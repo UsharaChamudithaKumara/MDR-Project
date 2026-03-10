@@ -1,0 +1,9 @@
+# Ignore node modules
+mdr-backend/node_modules
+mdr-frontend/node_modules
+
+# Ignore environment files
+.env
+
+# Ignore build files
+dist
