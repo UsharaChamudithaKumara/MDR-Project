@@ -112,6 +112,18 @@ const mdrController = {
       console.error("Update Error:", error);
       res.status(500).json({ error: "Update failed" });
     }
+  },
+
+  updateItemReturnDate: async (req, res) => {
+    try {
+      const itemId = req.params.id;
+      const { return_date } = req.body;
+      await MdrModel.updateItemReturnDate(itemId, return_date);
+      res.json({ message: "Return date updated successfully" });
+    } catch (error) {
+      console.error("Update Item Error:", error);
+      res.status(500).json({ error: "Update failed" });
+    }
   }
 };
 

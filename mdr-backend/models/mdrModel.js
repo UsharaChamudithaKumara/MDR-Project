@@ -163,6 +163,16 @@ const MdrModel = {
         resolve(result);
       });
     });
+  },
+
+  updateItemReturnDate: (itemId, returnDate) => {
+    return new Promise((resolve, reject) => {
+      const sql = `UPDATE mdr_items SET return_date = ? WHERE id = ?`;
+      db.query(sql, [returnDate, itemId], (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      });
+    });
   }
 };
 

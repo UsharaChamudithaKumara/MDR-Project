@@ -1,12 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Table, Tag, Typography, Button, Space, Select, Spin, message, Image } from "antd";
-import { PrinterOutlined, FilePdfOutlined, FileExcelOutlined, ArrowLeftOutlined, CheckCircleOutlined, ClockCircleOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import { Table, Tag, Typography, Button, Space, Select, Spin, message, Image, DatePicker } from "antd";
+import { PrinterOutlined, FilePdfOutlined, FileExcelOutlined, ArrowLeftOutlined, CheckCircleOutlined, ClockCircleOutlined, ExclamationCircleOutlined, SaveOutlined, ProfileOutlined } from "@ant-design/icons";
 import { useReactToPrint } from "react-to-print";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
+import dayjs from "dayjs";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -47,6 +48,19 @@ function ViewMDR() {
       } catch (error) {
          console.error(error);
          message.error("Failed to update status.");
+      }
+   };
+
+   const updateItemReturnDate = async (itemId, returnDate) => {
+      try {
+         await axios.put(`http://localhost:5000/update-item-return-date/${itemId}`, {
+            return_date: returnDate ? dayjs(returnDate).format('YYYY-MM-DD') : null,
+         });
+         message.success("Return date updated");
+         fetchData();
+      } catch (error) {
+         console.error(error);
+         message.error("Failed to update return date.");
       }
    };
 
@@ -105,17 +119,21 @@ function ViewMDR() {
          item.uom,
          item.po_qty ? Math.round(item.po_qty) : "-",
          item.received_qty ? Math.round(item.received_qty) : "0",
+         item.received_date ? dayjs(item.received_date).format('DD/MM/YYYY') : "-",
          item.rejected_qty ? Math.round(item.rejected_qty) : "0",
+         item.return_date ? dayjs(item.return_date).format('DD/MM/YYYY') : "-",
+         item.gate_pass_ref || "-",
          item.rejection_reason,
          item.rejection_remarks || "N/A"
       ]);
 
       autoTable(doc, {
          startY: 50,
-         head: [["Description", "UoM", "PO Qty", "Recv Qty", "Rej Qty", "Reason", "Remarks"]],
+         head: [["Description", "UoM", "PO Qty", "Recv Qty", "Recv Date", "Rej Qty", "Ret Date", "Gate Pass", "Reason", "Remarks"]],
          body: tableData,
          theme: 'grid',
-         headStyles: { fillColor: [52, 77, 103] }
+         headStyles: { fillColor: [52, 77, 103], fontSize: 8 },
+         styles: { fontSize: 8 }
       });
 
       doc.save(`MDR-${data.header.mdr_number}.pdf`);
@@ -128,7 +146,10 @@ function ViewMDR() {
          UoM: item.uom,
          "PO Qty": item.po_qty ? Math.round(item.po_qty) : 0,
          "Received Qty": item.received_qty ? Math.round(item.received_qty) : 0,
+         "Received Date": item.received_date ? dayjs(item.received_date).format('YYYY-MM-DD') : "-",
          "Rejected Qty": item.rejected_qty ? Math.round(item.rejected_qty) : 0,
+         "Return Date": item.return_date ? dayjs(item.return_date).format('YYYY-MM-DD') : "-",
+         "Gate Pass Ref": item.gate_pass_ref || "-",
          "Reason": item.rejection_reason,
          "Remarks": item.rejection_remarks
       })));
@@ -257,9 +278,26 @@ function ViewMDR() {
       { title: "UoM", dataIndex: "uom", key: "uom", align: "center" },
       { title: "PO Qty", dataIndex: "po_qty", key: "po", align: "center", render: t => <span className="text-slate-500">{t ? Math.round(t) : "-"}</span> },
       { title: "Recv Qty", dataIndex: "received_qty", key: "recv", align: "center", render: t => <span>{t ? Math.round(t) : "0"}</span> },
+      { title: "Recv Date", dataIndex: "received_date", key: "recv_date", align: "center", render: t => <span className="text-slate-400 text-xs">{t ? dayjs(t).format('DD/MM/YYYY') : "-"}</span> },
       { title: "Rej Qty", dataIndex: "rejected_qty", key: "rej", align: "center", render: t => <span className="text-[#FF0000] font-bold">{t ? Math.round(t) : "0"}</span> },
+      { 
+         title: "Return Date", 
+         dataIndex: "return_date", 
+         key: "ret_date", 
+         align: "center", 
+         render: (t, record) => (
+            <DatePicker 
+               value={t ? dayjs(t) : null} 
+               onChange={(date) => updateItemReturnDate(record.id, date)} 
+               className="w-32 text-xs"
+               size="small"
+               format="DD/MM/YYYY"
+            />
+         ) 
+      },
+      { title: "Gate Pass", dataIndex: "gate_pass_ref", key: "gate", align: "center", render: t => <span className="text-slate-400 text-xs font-mono">{t || "-"}</span> },
       { title: "Reason", dataIndex: "rejection_reason", key: "reason", render: t => <Tag className="border-none bg-slate-100 text-slate-700">{t}</Tag> },
-      { title: "Remarks", dataIndex: "rejection_remarks", key: "remarks", render: t => <span className="text-slate-500 text-sm">{t || "-"}</span> },
+      { title: "Remarks", dataIndex: "rejection_remarks", key: "remarks", render: t => <span className="text-slate-500 text-sm italic">{t || "-"}</span> },
    ];
 
    const InfoBlock = ({ label, value, highlight, icon }) => (
@@ -370,6 +408,7 @@ function ViewMDR() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-10">
                <InfoBlock label="Supplier Type" value={data.header.supplier_type} icon={<ExclamationCircleOutlined />} />
                <InfoBlock label="Supplier Name" value={data.header.supplier_name} icon={<CheckCircleOutlined />} />
+               <InfoBlock label="Supplier Ref No" value={data.header.supplier_ref} icon={<ProfileOutlined />} />
                <InfoBlock label="PO Number" value={data.header.po_number} icon={<FilePdfOutlined />} />
                <InfoBlock label="GRN Number" value={data.header.grn_no} icon={<PrinterOutlined />} />
                <InfoBlock label="Inspection By" value={data.header.inspection_by} icon={<ClockCircleOutlined />} />
