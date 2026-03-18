@@ -4,6 +4,7 @@ const userController = require("../controllers/userController");
 const { verifyToken, checkRole } = require("../middleware/authMiddleware");
 
 // All routes here require super_admin role
+router.get("/stats", verifyToken, checkRole(["super_admin"]), userController.getUserStats);
 router.get("/", verifyToken, checkRole(["super_admin"]), userController.getAllUsers);
 router.post("/change-password", verifyToken, checkRole(["super_admin"]), userController.changeUserPassword);
 router.patch("/:id/status", verifyToken, checkRole(["super_admin"]), userController.updateStatus);

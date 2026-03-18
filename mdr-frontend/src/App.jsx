@@ -6,9 +6,12 @@ import ViewMDR from "./pages/ViewMDR";
 import UOMManagement from "./pages/UOMManagement";
 import Dashboard from "./pages/Dashboard";
 import Layout from "./components/Layout";
+import AdminLayout from "./components/AdminLayout";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import UserManagement from "./pages/UserManagement";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -43,9 +46,25 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
-          
-          <Route 
-            path="/*" 
+
+          {/* Super Admin Area — completely separate */}
+          <Route
+            path="/admin/*"
+            element={
+              <ProtectedRoute roles={["super_admin"]}>
+                <AdminLayout>
+                  <Routes>
+                    <Route path="/" element={<AdminDashboard />} />
+                    <Route path="/users" element={<AdminUsers />} />
+                  </Routes>
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Main MDR System — for users and admins */}
+          <Route
+            path="/*"
             element={
               <ProtectedRoute>
                 <Layout>
@@ -63,7 +82,7 @@ function App() {
                   </Routes>
                 </Layout>
               </ProtectedRoute>
-            } 
+            }
           />
         </Routes>
       </Router>

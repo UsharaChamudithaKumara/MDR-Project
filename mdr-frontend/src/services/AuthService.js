@@ -40,6 +40,13 @@ const AuthService = {
     });
   },
 
+  getUserStats: async () => {
+    const token = localStorage.getItem("token");
+    return await axios.get(`${USER_API_URL}/stats`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
   changePassword: async (userId, newPassword) => {
     const token = localStorage.getItem("token");
     return await axios.post(`${USER_API_URL}/change-password`, 

@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const UserModel = require("../models/UserModel");
+const db = require("../config/db");
 
 const userController = {
   getAllUsers: async (req, res) => {
@@ -66,6 +67,28 @@ const userController = {
       res.json({ message: "User deleted successfully" });
     } catch (error) {
       console.error("Delete User Error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  },
+
+  getUserStats: async (req, res) => {
+    try {
+      const sql = `
+        SELECT
+          COUNT(*) AS total,
+          SUM(status = 'pending') AS pending,
+          SUM(status = 'approved') AS approved,
+          SUM(status = 'rejected') AS rejected,
+          SUM(role = 'admin') AS admins,
+          SUM(role = 'user') AS users
+        FROM users
+        WHERE role != 'super_admin'
+      `;
+      db.query(sql, (err, results) => {
+        if (err) return res.status(500).json({ message: "Error fetching stats" });
+        res.json(results[0]);
+      });
+    } catch (error) {
       res.status(500).json({ message: "Internal server error" });
     }
   }
