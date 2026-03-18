@@ -1,9 +1,18 @@
-import { Link, useLocation } from "react-router-dom";
-import { DashboardOutlined, PlusSquareOutlined, UnorderedListOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { DashboardOutlined, PlusSquareOutlined, UnorderedListOutlined, LeftOutlined, RightOutlined, UserOutlined, LogoutOutlined } from "@ant-design/icons";
 import cpcLogo from "../Image/Ceylon_Petroleum_Corporation_logo.png";
+import AuthService from "../services/AuthService";
 
 function Sidebar({ isCollapsed, setIsCollapsed }) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const user = AuthService.getCurrentUser();
+
+  const handleLogout = () => {
+    AuthService.logout();
+    navigate("/login");
+    window.location.reload();
+  };
 
   const menuItems = [
     { name: "Dashboard", path: "/", icon: <DashboardOutlined /> },
@@ -11,6 +20,11 @@ function Sidebar({ isCollapsed, setIsCollapsed }) {
     { name: "MDR List", path: "/mdr-list", icon: <UnorderedListOutlined /> },
     { name: "UOM Management", path: "/uom", icon: <UnorderedListOutlined /> },
   ];
+
+  // Add User Management for super_admin
+  if (user && user.role === 'super_admin') {
+    menuItems.push({ name: "User Management", path: "/users", icon: <UserOutlined /> });
+  }
 
   return (
     <div className={`${isCollapsed ? 'w-20' : 'w-64'} bg-[#1e293b] text-white flex flex-col h-screen fixed top-0 left-0 shadow-2xl z-20 transition-all duration-300`}>
@@ -56,8 +70,41 @@ function Sidebar({ isCollapsed, setIsCollapsed }) {
       </div>
 
       {!isCollapsed && (
-        <div className="p-6 border-t border-white/10 text-center text-xs text-slate-500 bg-black/20 whitespace-nowrap">
-          <div className="font-medium text-slate-400 mb-1">Ceylon Petroleum Corporation</div>
+        <div className="p-4 border-t border-white/10 bg-black/20">
+          <div className="flex items-center gap-3 mb-3 px-2">
+            <div className="w-8 h-8 rounded-full bg-[#FF0000] flex items-center justify-center font-bold text-sm">
+              {user?.username?.[0]?.toUpperCase()}
+            </div>
+            <div className="overflow-hidden">
+              <div className="text-sm font-medium truncate">{user?.username}</div>
+              <div className="text-[10px] text-slate-500 uppercase tracking-wider">{user?.role}</div>
+            </div>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-300 text-sm"
+          >
+            <LogoutOutlined />
+            <span>Logout</span>
+          </button>
+        </div>
+      )}
+
+      {isCollapsed && (
+        <div className="py-4 border-t border-white/10 flex flex-col items-center gap-4 bg-black/20">
+          <button
+            onClick={handleLogout}
+            className="text-slate-400 hover:text-white transition-colors"
+            title="Logout"
+          >
+            <LogoutOutlined className="text-lg" />
+          </button>
+        </div>
+      )}
+
+      {!isCollapsed && (
+        <div className="p-4 text-center text-[10px] text-slate-600 border-t border-white/5 bg-black/30">
+          <div className="font-medium">Ceylon Petroleum Corporation</div>
           <p>&copy; 2026 MDR System</p>
         </div>
       )}

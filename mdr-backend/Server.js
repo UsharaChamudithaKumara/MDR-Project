@@ -5,6 +5,8 @@ require("dotenv").config({ quiet: true });
 
 const mdrRoutes = require("./routes/mdrRoutes");
 const uomRoutes = require("./routes/uomRoutes");
+const authRoutes = require("./routes/authRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 const app = express();
 
@@ -31,6 +33,8 @@ app.get("/", (req, res) => {
 // Mount the MDR routes to the root path to match the existing frontend configuration
 app.use("/", mdrRoutes);
 app.use("/api", uomRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 
 // ===============================
 // START SERVER

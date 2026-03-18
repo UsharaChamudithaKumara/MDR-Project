@@ -6,6 +6,10 @@ import ViewMDR from "./pages/ViewMDR";
 import UOMManagement from "./pages/UOMManagement";
 import Dashboard from "./pages/Dashboard";
 import Layout from "./components/Layout";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import UserManagement from "./pages/UserManagement";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -36,15 +40,32 @@ function App() {
       }}
     >
       <Router>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/mdr-list" element={<MDRList />} />
-            <Route path="/create" element={<CreateMDR />} />
-            <Route path="/mdr/:id" element={<ViewMDR />} />
-            <Route path="/uom" element={<UOMManagement />} />
-          </Routes>
-        </Layout>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          
+          <Route 
+            path="/*" 
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/mdr-list" element={<MDRList />} />
+                    <Route path="/create" element={<CreateMDR />} />
+                    <Route path="/mdr/:id" element={<ViewMDR />} />
+                    <Route path="/uom" element={<UOMManagement />} />
+                    <Route path="/users" element={
+                      <ProtectedRoute roles={['super_admin']}>
+                        <UserManagement />
+                      </ProtectedRoute>
+                    } />
+                  </Routes>
+                </Layout>
+              </ProtectedRoute>
+            } 
+          />
+        </Routes>
       </Router>
     </ConfigProvider>
   );
