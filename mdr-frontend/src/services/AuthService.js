@@ -48,6 +48,14 @@ const AuthService = {
     );
   },
 
+  updateStatus: async (userId, status) => {
+    const token = localStorage.getItem("token");
+    const response = await axios.patch(`${USER_API_URL}/${userId}/status`, { status }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  },
+
   deleteUser: async (id) => {
     const token = localStorage.getItem("token");
     return await axios.delete(`${USER_API_URL}/${id}`, {

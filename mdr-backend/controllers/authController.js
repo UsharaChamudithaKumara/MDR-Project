@@ -21,15 +21,18 @@ const authController = {
       const salt = await bcrypt.genSalt(10);
       const password_hash = await bcrypt.hash(password, salt);
 
+      // Security: Prevent creating a super_admin via signup
+      const assignedRole = (role === "super_admin") ? "user" : (role || "user");
+
       // Create user
       const userId = await UserModel.create({
         username,
         email,
         password_hash,
-        role: role || "user"
+        role: assignedRole
       });
 
-      res.status(201).json({ message: "User registered successfully", userId });
+      res.status(201).json({ message: "User registered successfully. Your account is pending approval by a Super Admin." });
     } catch (error) {
       console.error("Register Error:", error);
       res.status(500).json({ message: "Internal server error" });
@@ -52,6 +55,13 @@ const authController = {
       const isMatch = await bcrypt.compare(password, user.password_hash);
       if (!isMatch) {
         return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      if (user.status !== 'approved') {
+        const statusMsg = user.status === 'pending' 
+          ? "Your account is pending approval by a Super Admin." 
+          : "Your account has been rejected.";
+        return res.status(403).json({ message: statusMsg });
       }
 
       // Generate JWT

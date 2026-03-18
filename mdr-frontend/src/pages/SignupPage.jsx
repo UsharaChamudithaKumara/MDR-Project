@@ -176,7 +176,6 @@ const SignupPage = () => {
                 <Select className="rounded-xl h-12 border-slate-200 transition-all focus:border-red-600">
                   <Option value="user">User</Option>
                   <Option value="admin">Admin</Option>
-                  <Option value="super_admin">Super Admin</Option>
                 </Select>
               </Form.Item>
             </motion.div>

@@ -10,7 +10,13 @@ async function seedSuperAdmin() {
 
     const existingUser = await UserModel.findByUsername(username);
     if (existingUser) {
-      console.log("Super Admin already exists.");
+      // Fix: if status is not 'approved', update it
+      if (existingUser.status !== "approved") {
+        await UserModel.updateStatus(existingUser.id, "approved");
+        console.log("Super Admin status was '" + existingUser.status + "'. Fixed to 'approved'.");
+      } else {
+        console.log("Super Admin already exists with correct status.");
+      }
       process.exit(0);
     }
 
@@ -21,7 +27,8 @@ async function seedSuperAdmin() {
       username,
       email,
       password_hash,
-      role: "super_admin"
+      role: "super_admin",
+      status: "approved"
     });
 
     console.log("Super Admin seeded successfully!");

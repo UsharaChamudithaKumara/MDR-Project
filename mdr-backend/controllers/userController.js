@@ -32,6 +32,22 @@ const userController = {
     }
   },
 
+  updateStatus: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      if (!['approved', 'rejected', 'pending'].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+
+      await UserModel.updateStatus(id, status);
+      res.json({ message: `User status updated to ${status}` });
+    } catch (error) {
+      res.status(500).json({ message: "Error updating status", error: error.message });
+    }
+  },
+
   deleteUser: async (req, res) => {
     try {
       const { id } = req.params;

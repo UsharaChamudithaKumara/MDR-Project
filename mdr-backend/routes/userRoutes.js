@@ -6,6 +6,7 @@ const { verifyToken, checkRole } = require("../middleware/authMiddleware");
 // All routes here require super_admin role
 router.get("/", verifyToken, checkRole(["super_admin"]), userController.getAllUsers);
 router.post("/change-password", verifyToken, checkRole(["super_admin"]), userController.changeUserPassword);
+router.patch("/:id/status", verifyToken, checkRole(["super_admin"]), userController.updateStatus);
 router.delete("/:id", verifyToken, checkRole(["super_admin"]), userController.deleteUser);
 
 module.exports = router;

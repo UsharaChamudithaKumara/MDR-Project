@@ -52,6 +52,16 @@ const UserManagement = () => {
     }
   };
 
+  const handleUpdateStatus = async (id, status) => {
+    try {
+      await AuthService.updateStatus(id, status);
+      message.success(`User ${status} successfully`);
+      fetchUsers();
+    } catch (error) {
+      message.error(error.response?.data?.message || `Failed to ${status} user`);
+    }
+  };
+
   const columns = [
     {
       title: 'Username',
@@ -74,10 +84,48 @@ const UserManagement = () => {
       }
     },
     {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status) => {
+        let color = 'orange';
+        if (status === 'approved') color = 'success';
+        if (status === 'rejected') color = 'error';
+        return <Tag color={color}>{status?.toUpperCase() || 'PENDING'}</Tag>;
+      }
+    },
+    {
       title: 'Actions',
       key: 'actions',
       render: (_, record) => (
         <Space size="middle">
+          {record.status === 'pending' && (
+            <>
+              <Button 
+                type="primary" 
+                size="small"
+                style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
+                onClick={() => handleUpdateStatus(record.id, 'approved')}
+              >
+                Approve
+              </Button>
+              <Button 
+                danger 
+                size="small"
+                onClick={() => handleUpdateStatus(record.id, 'rejected')}
+              >
+                Reject
+              </Button>
+            </>
+          )}
+          {record.status === 'rejected' && (
+            <Button 
+              size="small"
+              onClick={() => handleUpdateStatus(record.id, 'approved')}
+            >
+              Approve
+            </Button>
+          )}
           <Button 
             icon={<KeyOutlined />} 
             onClick={() => {
@@ -112,8 +160,8 @@ const UserManagement = () => {
       <Card 
         title={
           <Space>
-            <UsergroupAddOutlined style={{ color: '#1890ff', fontSize: '24px' }} />
-            <Title level={3} style={{ margin: 0 }}>User Management</Title>
+            <UsergroupAddOutlined style={{ color: '#1e293b', fontSize: '24px' }} />
+            <Title level={3} style={{ margin: 0 }}>System User Management</Title>
           </Space>
         }
         className="shadow-sm border-0"
