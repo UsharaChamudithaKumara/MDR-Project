@@ -95,9 +95,9 @@ const MdrModel = {
     });
   },
 
-  getAllMdrs: () => {
+  getAllMdrs: (filters = {}) => {
     return new Promise((resolve, reject) => {
-      const sql = `
+      let sql = `
         SELECT 
           h.id,
           h.mdr_number,
@@ -112,9 +112,34 @@ const MdrModel = {
             WHERE i.mdr_id = h.id
           ) AS total_items
         FROM mdr_headers h
-        ORDER BY h.id DESC
+        WHERE 1=1
       `;
-      db.query(sql, (err, results) => {
+      const values = [];
+
+      if (filters.status) {
+        sql += ` AND h.status = ?`;
+        values.push(filters.status);
+      }
+
+      if (filters.supplier_name) {
+        sql += ` AND h.supplier_name LIKE ?`;
+        values.push(`%${filters.supplier_name}%`);
+      }
+
+      if (filters.start_date && filters.end_date) {
+        sql += ` AND h.mdr_date >= ? AND h.mdr_date <= ?`;
+        values.push(filters.start_date, filters.end_date);
+      } else if (filters.start_date) {
+        sql += ` AND h.mdr_date >= ?`;
+        values.push(filters.start_date);
+      } else if (filters.end_date) {
+        sql += ` AND h.mdr_date <= ?`;
+        values.push(filters.end_date);
+      }
+
+      sql += ` ORDER BY h.id DESC`;
+
+      db.query(sql, values, (err, results) => {
         if (err) return reject(err);
         resolve(results);
       });
@@ -171,6 +196,54 @@ const MdrModel = {
       db.query(sql, [returnDate, itemId], (err, result) => {
         if (err) return reject(err);
         resolve(result);
+      });
+    });
+  },
+
+  getReportData: (filters) => {
+    return new Promise((resolve, reject) => {
+      let sql = `
+        SELECT 
+          h.mdr_number, 
+          h.mdr_date, 
+          h.po_number, 
+          h.supplier_name, 
+          i.item_description, 
+          i.rejected_qty, 
+          i.rejection_reason, 
+          h.status
+        FROM mdr_headers h
+        LEFT JOIN mdr_items i ON h.id = i.mdr_id
+        WHERE 1=1
+      `;
+      const values = [];
+
+      if (filters.status) {
+        sql += ` AND h.status = ?`;
+        values.push(filters.status);
+      }
+
+      if (filters.supplier_name) {
+        sql += ` AND h.supplier_name LIKE ?`;
+        values.push(`%${filters.supplier_name}%`);
+      }
+
+      if (filters.start_date && filters.end_date) {
+        sql += ` AND h.mdr_date >= ? AND h.mdr_date <= ?`;
+        values.push(filters.start_date, filters.end_date);
+      } else if (filters.start_date) {
+        sql += ` AND h.mdr_date >= ?`;
+        values.push(filters.start_date);
+      } else if (filters.end_date) {
+        sql += ` AND h.mdr_date <= ?`;
+        values.push(filters.end_date);
+      }
+
+      sql += ` ORDER BY h.id DESC`;
+
+      db.query(sql, values, (err, results) => {
+        if (err) return reject(err);
+        resolve(results);
       });
     });
   }

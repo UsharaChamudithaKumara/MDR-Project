@@ -1,14 +1,22 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { Table, Tag, Input, Button, Space, Typography } from "antd";
-import { SearchOutlined, PlusOutlined, AppstoreOutlined, AlertOutlined, ClockCircleOutlined, CheckCircleOutlined } from "@ant-design/icons";
+import { Table, Tag, Input, Button, Space, Typography, DatePicker, Select } from "antd";
+import { SearchOutlined, PlusOutlined, AppstoreOutlined, AlertOutlined, ClockCircleOutlined, CheckCircleOutlined, ReloadOutlined } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
+const { RangePicker } = DatePicker;
+const { Option } = Select;
 
 function Dashboard() {
   const [mdrs, setMdrs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState({
+    startDate: null,
+    endDate: null,
+    supplier: "",
+    status: ""
+  });
 
   useEffect(() => {
     fetchMDRs();
@@ -16,8 +24,14 @@ function Dashboard() {
 
   const fetchMDRs = () => {
     setLoading(true);
+    const params = {};
+    if (filters.status) params.status = filters.status;
+    if (filters.supplier) params.supplier_name = filters.supplier;
+    if (filters.startDate) params.start_date = filters.startDate.format("YYYY-MM-DD");
+    if (filters.endDate) params.end_date = filters.endDate.format("YYYY-MM-DD");
+
     axios
-      .get("http://localhost:5000/mdr-list")
+      .get("http://localhost:5000/mdr-list", { params })
       .then((res) => {
         setMdrs(res.data);
         setLoading(false);
@@ -161,6 +175,77 @@ function Dashboard() {
             New MDR
           </Button>
         </Link>
+      </div>
+
+      {/* Filters Section */}
+      <div className="glass-panel rounded-2xl p-6 sm:p-8 mb-8 backdrop-blur-md bg-white/60 border border-white/20 shadow-xl">
+        <Title level={5} className="mb-4 text-slate-700">Filter Overview Data</Title>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <span className="block text-sm font-medium text-slate-500 mb-1">Date Range</span>
+            <RangePicker 
+              className="w-full text-base" 
+              size="large"
+              onChange={(dates) => {
+                setFilters({
+                  ...filters,
+                  startDate: dates ? dates[0] : null,
+                  endDate: dates ? dates[1] : null
+                })
+              }}
+            />
+          </div>
+          <div>
+            <span className="block text-sm font-medium text-slate-500 mb-1">Status</span>
+            <Select 
+              className="w-full" 
+              size="large" 
+              placeholder="All Statuses" 
+              allowClear
+              onChange={(val) => setFilters({...filters, status: val})}
+              value={filters.status || undefined}
+            >
+              <Option value="Open">Open</Option>
+              <Option value="Pending Supplier Response">Pending Supplier Response</Option>
+              <Option value="Complete">Complete</Option>
+              <Option value="Closed">Closed</Option>
+            </Select>
+          </div>
+          <div>
+            <span className="block text-sm font-medium text-slate-500 mb-1">Supplier Name</span>
+            <Input 
+              placeholder="Search supplier..." 
+              size="large" 
+              allowClear
+              onChange={(e) => setFilters({...filters, supplier: e.target.value})}
+              value={filters.supplier}
+            />
+          </div>
+          <div className="flex items-end gap-2">
+            <Button 
+              type="primary" 
+              size="large" 
+              icon={<SearchOutlined />} 
+              onClick={fetchMDRs}
+              loading={loading}
+              className="bg-[#344D67] hover:bg-[#2c4055] border-none flex-1"
+            >
+              Generate
+            </Button>
+            <Button 
+              size="large" 
+              icon={<ReloadOutlined />} 
+              onClick={() => {
+                setFilters({ startDate: null, endDate: null, supplier: "", status: "" });
+                setLoading(true);
+                axios.get("http://localhost:5000/mdr-list").then(res => {
+                  setMdrs(res.data); setLoading(false);
+                });
+              }}
+              title="Reset Filters"
+            />
+          </div>
+        </div>
       </div>
 
       {/* Summary Cards */}

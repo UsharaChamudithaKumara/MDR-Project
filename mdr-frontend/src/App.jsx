@@ -13,6 +13,7 @@ import UserManagement from "./pages/UserManagement";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Reports from "./pages/Reports";
 
 function App() {
   return (
@@ -74,6 +75,7 @@ function App() {
                     <Route path="/create" element={<CreateMDR />} />
                     <Route path="/mdr/:id" element={<ViewMDR />} />
                     <Route path="/uom" element={<UOMManagement />} />
+                    <Route path="/reports" element={<Reports />} />
                     <Route path="/users" element={
                       <ProtectedRoute roles={['super_admin']}>
                         <UserManagement />

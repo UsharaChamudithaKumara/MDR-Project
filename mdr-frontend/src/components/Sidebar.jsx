@@ -18,6 +18,7 @@ function Sidebar({ isCollapsed, setIsCollapsed }) {
     { name: "Dashboard", path: "/", icon: <DashboardOutlined /> },
     { name: "Create MDR", path: "/create", icon: <PlusSquareOutlined /> },
     { name: "MDR List", path: "/mdr-list", icon: <UnorderedListOutlined /> },
+    { name: "Reports", path: "/reports", icon: <UnorderedListOutlined /> },
     { name: "UOM Management", path: "/uom", icon: <UnorderedListOutlined /> },
   ];
 

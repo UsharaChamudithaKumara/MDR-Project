@@ -54,7 +54,10 @@ const mdrController = {
 
   getMdrList: async (req, res) => {
     try {
-      const results = await MdrModel.getAllMdrs();
+      const { status, supplier_name, start_date, end_date } = req.query;
+      const filters = { status, supplier_name, start_date, end_date };
+
+      const results = await MdrModel.getAllMdrs(filters);
       res.json(results);
     } catch (error) {
       console.error("Fetch List Error:", error);
@@ -123,6 +126,19 @@ const mdrController = {
     } catch (error) {
       console.error("Update Item Error:", error);
       res.status(500).json({ error: "Update failed" });
+    }
+  },
+
+  generateReport: async (req, res) => {
+    try {
+      const { status, supplier_name, start_date, end_date } = req.query;
+      const filters = { status, supplier_name, start_date, end_date };
+      
+      const reportData = await MdrModel.getReportData(filters);
+      res.json(reportData);
+    } catch (error) {
+      console.error("Generate Report Error:", error);
+      res.status(500).json({ error: "Failed to generate report" });
     }
   }
 };

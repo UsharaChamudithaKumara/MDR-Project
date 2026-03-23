@@ -32,6 +32,7 @@ const upload = multer({ storage: storage });
 router.post("/create-mdr", upload.array("evidence_photos", 10), mdrController.createMdr);
 router.get("/mdr-list", mdrController.getMdrList);
 router.get("/mdr/:id", mdrController.getMdrDetails);
+router.get("/mdr-report", mdrController.generateReport);
 router.put("/update-status/:id", mdrController.updateMdrStatus);
 router.put("/update-item-return-date/:id", mdrController.updateItemReturnDate);
 
