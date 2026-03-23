@@ -1,46 +1,94 @@
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { ConfigProvider } from "antd";
 import MDRList from "./pages/MDRList";
 import CreateMDR from "./pages/CreateMDR";
 import ViewMDR from "./pages/ViewMDR";
+import UOMManagement from "./pages/UOMManagement";
 import Dashboard from "./pages/Dashboard";
-
+import Layout from "./components/Layout";
+import AdminLayout from "./components/AdminLayout";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import UserManagement from "./pages/UserManagement";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Reports from "./pages/Reports";
 
 function App() {
   return (
-    <Router>
-      {/* Navbar */}
-      <div className="bg-white shadow-md">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold text-gray-800">
-            MDR System
-          </h1>
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: '#344D67',
+          colorInfo: '#217346',
+          borderRadius: 8,
+          fontFamily: '"Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+          colorBgContainer: '#ffffff',
+          colorTextBase: '#1f2937',
+        },
+        components: {
+          Button: {
+            controlHeight: 40,
+            controlHeightLG: 48,
+          },
+          Card: {
+            boxShadowTertiary: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+          },
+          Table: {
+            headerBg: '#f8fafc',
+            headerColor: '#475569',
+            rowHoverBg: '#f1f5f9',
+          }
+        }
+      }}
+    >
+      <Router>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
 
-          <div className="space-x-6">
-            <Link
-              to="/"
-              className="text-gray-700 hover:text-blue-600 font-medium"
-            >
-              MDR List
-            </Link>
+          {/* Super Admin Area — completely separate */}
+          <Route
+            path="/admin/*"
+            element={
+              <ProtectedRoute roles={["super_admin"]}>
+                <AdminLayout>
+                  <Routes>
+                    <Route path="/" element={<AdminDashboard />} />
+                    <Route path="/users" element={<AdminUsers />} />
+                  </Routes>
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
 
-            <Link
-              to="/create"
-              className="text-gray-700 hover:text-blue-600 font-medium"
-            >
-              Create MDR
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Routes */}
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/mdr-list" element={<MDRList />} />
-        <Route path="/create" element={<CreateMDR />} />
-        <Route path="/mdr/:id" element={<ViewMDR />} />
-      </Routes>
-    </Router>
+          {/* Main MDR System — for users and admins */}
+          <Route
+            path="/*"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/mdr-list" element={<MDRList />} />
+                    <Route path="/create" element={<CreateMDR />} />
+                    <Route path="/mdr/:id" element={<ViewMDR />} />
+                    <Route path="/uom" element={<UOMManagement />} />
+                    <Route path="/reports" element={<Reports />} />
+                    <Route path="/users" element={
+                      <ProtectedRoute roles={['super_admin']}>
+                        <UserManagement />
+                      </ProtectedRoute>
+                    } />
+                  </Routes>
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </Router>
+    </ConfigProvider>
   );
 }
 
