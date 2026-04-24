@@ -84,11 +84,10 @@ const userController = {
         FROM users
         WHERE role != 'super_admin'
       `;
-      db.query(sql, (err, results) => {
-        if (err) return res.status(500).json({ message: "Error fetching stats" });
-        res.json(results[0]);
-      });
+      const [results] = await db.query(sql);
+      res.json(results[0]);
     } catch (error) {
+      console.error("Get Stats Error:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   }

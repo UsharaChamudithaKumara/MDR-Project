@@ -42,12 +42,17 @@ function ViewMDR() {
       try {
          await axios.put(`http://localhost:5000/update-status/${id}`, {
             status: newStatus,
+            version: data.header.version, // Include version for optimistic locking
          });
          message.success(`Status updated to ${newStatus}`);
          fetchData();
       } catch (error) {
          console.error(error);
-         message.error("Failed to update status.");
+         if (error.response && error.response.status === 409) {
+            message.error("Conflict: This MDR has been modified by another user. Please refresh the page.");
+         } else {
+            message.error("Failed to update status.");
+         }
       }
    };
 
