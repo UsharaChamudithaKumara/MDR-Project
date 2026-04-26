@@ -76,7 +76,7 @@ function Sidebar({ isCollapsed, setIsCollapsed }) {
           <div className="flex items-center gap-3 mb-3 px-2">
             <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center bg-[#FF0000] shadow-lg shadow-red-500/20">
               {user?.profile_image ? (
-                <img src={`http://localhost:5000${user.profile_image}`} alt="Avatar" className="w-full h-full object-cover" />
+                <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${user.profile_image}`} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
                 <span className="font-bold text-sm text-white">{user?.username?.[0]?.toUpperCase()}</span>
               )}

@@ -11,7 +11,7 @@ function MDRList() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/mdr-list")
+      .get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/mdr-list`)
       .then((res) => setMdrs(res.data))
       .catch((err) => console.error(err));
   }, []);

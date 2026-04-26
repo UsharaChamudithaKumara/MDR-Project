@@ -26,7 +26,7 @@ function ViewMDR() {
    const fetchData = () => {
       setLoading(true);
       axios
-         .get(`http://localhost:5000/mdr/${id}`)
+         .get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/mdr/${id}`)
          .then((res) => {
             setData(res.data);
             setLoading(false);
@@ -40,7 +40,7 @@ function ViewMDR() {
 
    const updateStatus = async (newStatus) => {
       try {
-         await axios.put(`http://localhost:5000/update-status/${id}`, {
+         await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/update-status/${id}`, {
             status: newStatus,
             version: data.header.version, // Include version for optimistic locking
          });
@@ -58,7 +58,7 @@ function ViewMDR() {
 
    const updateItemReturnDate = async (itemId, returnDate) => {
       try {
-         await axios.put(`http://localhost:5000/update-item-return-date/${itemId}`, {
+         await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/update-item-return-date/${itemId}`, {
             return_date: returnDate ? dayjs(returnDate).format('YYYY-MM-DD') : null,
          });
          message.success("Return date updated");
@@ -457,7 +457,7 @@ function ViewMDR() {
                              </div>
                              <div className="w-full h-full rounded-xl overflow-hidden bg-slate-50 flex items-center justify-center">
                                <Image
-                                  src={`http://localhost:5000${att.file_path}`}
+                                  src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${att.file_path}`}
                                   alt={`Evidence ${index + 1}`}
                                    className="object-cover w-full h-full transform group-hover:scale-110 transition-transform duration-700"
                                    classNames={{ 

@@ -30,7 +30,7 @@ function Reports() {
       if (filters.startDate) params.start_date = filters.startDate.format("YYYY-MM-DD");
       if (filters.endDate) params.end_date = filters.endDate.format("YYYY-MM-DD");
 
-      const response = await axios.get("http://localhost:5000/mdr-report", { params });
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/mdr-report`, { params });
       // Add a unique key for the table rows
       const reportsWithKey = response.data.map((item, index) => ({
         ...item,

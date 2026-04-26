@@ -112,7 +112,7 @@ function ProfilePage() {
   }
 
   const profileImageUrl = user?.profile_image 
-    ? `http://localhost:5000${user.profile_image}` 
+    ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${user.profile_image}` 
     : null;
 
   return (

@@ -31,7 +31,7 @@ function Dashboard() {
     if (filters.endDate) params.end_date = filters.endDate.format("YYYY-MM-DD");
 
     axios
-      .get("http://localhost:5000/mdr-list", { params })
+      .get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/mdr-list`, { params })
       .then((res) => {
         setMdrs(res.data);
         setLoading(false);
@@ -238,7 +238,7 @@ function Dashboard() {
               onClick={() => {
                 setFilters({ startDate: null, endDate: null, supplier: "", status: "" });
                 setLoading(true);
-                axios.get("http://localhost:5000/mdr-list").then(res => {
+                axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/mdr-list`).then(res => {
                   setMdrs(res.data); setLoading(false);
                 });
               }}
