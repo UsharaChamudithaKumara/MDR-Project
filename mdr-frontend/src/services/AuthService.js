@@ -22,6 +22,10 @@ const AuthService = {
     localStorage.removeItem("token");
   },
 
+  updateLocalUser: (userData) => {
+    localStorage.setItem("user", JSON.stringify(userData));
+  },
+
   getCurrentUser: () => {
     const userStr = localStorage.getItem("user");
     if (!userStr) return null;

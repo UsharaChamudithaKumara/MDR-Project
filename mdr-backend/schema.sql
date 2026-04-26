@@ -58,6 +58,12 @@ CREATE TABLE IF NOT EXISTS users (
   username VARCHAR(50) UNIQUE NOT NULL,
   email VARCHAR(100) UNIQUE NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
+  full_name VARCHAR(255),
+  phone_number VARCHAR(20),
+  epf_number VARCHAR(50),
+  department VARCHAR(100),
+  designation VARCHAR(100),
+  profile_image VARCHAR(255),
   role ENUM('user', 'admin', 'super_admin') DEFAULT 'user',
   status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

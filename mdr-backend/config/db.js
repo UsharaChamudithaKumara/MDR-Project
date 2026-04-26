@@ -7,12 +7,15 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME || "mdr_system"
 });
 
-db.connect((err) => {
-  if (err) {
-    console.log("Database connection failed:", err);
-  } else {
-    console.log("Database Connected");
+// Test database connection
+(async () => {
+  try {
+    const connection = await pool.getConnection();
+    console.log("Database Connected successfully");
+    connection.release();
+  } catch (err) {
+    console.error("Database connection failed:", err.message);
   }
-});
+})();
 
 module.exports = pool;

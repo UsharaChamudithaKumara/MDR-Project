@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import { Form, Input, Select, DatePicker, Button, Radio, Upload, message, Table, Typography, Space, AutoComplete, Steps } from "antd";
-import { InboxOutlined, PlusOutlined, DeleteOutlined, ArrowLeftOutlined, BuildOutlined, SettingOutlined, PictureOutlined, ProfileOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
+import { Form, Input, Select, DatePicker, Button, Radio, Upload, message, Table, Typography, Space, AutoComplete, Steps, Popconfirm } from "antd";
+import { InboxOutlined, PlusOutlined, DeleteOutlined, ArrowLeftOutlined, BuildOutlined, SettingOutlined, PictureOutlined, ProfileOutlined, ClearOutlined } from "@ant-design/icons";
 
 const { Dragger } = Upload;
 const { Title, Text } = Typography;
@@ -14,25 +15,95 @@ function CreateMDR() {
 
   const [currentStep, setCurrentStep] = useState(0);
 
-  const [items, setItems] = useState([
-    {
-      key: "0",
-      item_description: "",
-      po_qty: null,
-      received_qty: null,
-      rejected_qty: null,
-      uom: "Nos",
-      received_date: null,
-      return_date: null,
-      gate_pass_ref: "",
-      rejection_reason: "",
-      rejection_remarks: ""
-    }
-  ]);
+  const defaultItem = {
+    key: "0",
+    item_description: "",
+    po_qty: null,
+    received_qty: null,
+    rejected_qty: null,
+    uom: "Nos",
+    received_date: null,
+    return_date: null,
+    gate_pass_ref: "",
+    rejection_reason: "",
+    rejection_remarks: ""
+  };
+
+  const [items, setItems] = useState([{ ...defaultItem }]);
 
   const [fileList, setFileList] = useState([]);
   const [uomOptions, setUomOptions] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasDraft, setHasDraft] = useState(false);
+
+  const stateRef = useRef({ currentStep, items });
+  useEffect(() => {
+    stateRef.current = { currentStep, items };
+  }, [currentStep, items]);
+
+  useEffect(() => {
+    const draft = localStorage.getItem("draftMDR");
+    if (draft) {
+      try {
+        const parsed = JSON.parse(draft);
+        let loadedDraft = false;
+
+        if (parsed.currentStep !== undefined) {
+          setCurrentStep(parsed.currentStep);
+          loadedDraft = true;
+        }
+        if (parsed.items && parsed.items.length > 0) {
+          const restoredItems = parsed.items.map(item => ({
+            ...item,
+            received_date: item.received_date ? dayjs(item.received_date) : null,
+            return_date: item.return_date ? dayjs(item.return_date) : null,
+          }));
+          setItems(restoredItems);
+          loadedDraft = true;
+        }
+        if (parsed.formValues) {
+          const formVals = { ...parsed.formValues };
+          if (formVals.mdr_date) formVals.mdr_date = dayjs(formVals.mdr_date);
+          form.setFieldsValue(formVals);
+          loadedDraft = true;
+        }
+
+        if (loadedDraft) {
+          setHasDraft(true);
+        }
+      } catch (error) {
+        console.error("Failed to parse draft MDR", error);
+      }
+    }
+  }, [form]);
+
+  const saveDraft = (formValues = null) => {
+    const draft = {
+      currentStep: stateRef.current.currentStep,
+      items: stateRef.current.items,
+      formValues: formValues || form.getFieldsValue()
+    };
+    localStorage.setItem("draftMDR", JSON.stringify(draft));
+    setHasDraft(true);
+  };
+
+  useEffect(() => {
+    saveDraft();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStep, items]);
+
+  const handleValuesChange = (_, allValues) => {
+    saveDraft(allValues);
+  };
+
+  const handleClearDraft = () => {
+    localStorage.removeItem("draftMDR");
+    form.resetFields();
+    setCurrentStep(0);
+    setItems([{ ...defaultItem, key: new Date().getTime().toString() }]);
+    setHasDraft(false);
+    message.success("Draft cleared. Started fresh.");
+  };
 
   useEffect(() => {
     const fetchUOMs = async () => {
@@ -49,21 +120,12 @@ function CreateMDR() {
   }, []);
 
   const handleAddItem = () => {
-    const newKey = items.length.toString();
+    const newKey = new Date().getTime().toString();
     setItems([
       ...items,
       {
-        key: newKey,
-        item_description: "",
-        po_qty: null,
-        received_qty: null,
-        rejected_qty: null,
-        uom: "Nos",
-        received_date: null,
-        return_date: null,
-        gate_pass_ref: "",
-        rejection_reason: "",
-        rejection_remarks: ""
+        ...defaultItem,
+        key: newKey
       }
     ]);
   };
@@ -170,6 +232,7 @@ function CreateMDR() {
       });
 
       message.success(`MDR ${res.data.mdr_number} Created Successfully`);
+      localStorage.removeItem("draftMDR");
       navigate("/");
     } catch (error) {
       console.error(error);
@@ -221,60 +284,6 @@ function CreateMDR() {
     }
   };
 
-  const itemColumns = [
-    { title: "Item Description*", dataIndex: "item_description", width: 280, render: (t, r) => <Input size="large" className="rounded-md bg-slate-50 focus:bg-white" value={r.item_description} onChange={e => handleItemChange(r.key, "item_description", e.target.value)} /> },
-    { 
-      title: "UoM", 
-      dataIndex: "uom", 
-      width: 140, 
-      render: (t, r) => (
-        <AutoComplete
-          options={uomOptions}
-          value={r.uom}
-          onChange={v => handleItemChange(r.key, "uom", v)}
-          filterOption={(inputValue, option) =>
-            option.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
-          }
-        >
-          <Input size="large" className="rounded-md bg-slate-50 focus:bg-white" />
-        </AutoComplete>
-      ) 
-    },
-    { title: "PO Qty", dataIndex: "po_quantity", width: 120, render: (t, r) => <Input size="large" className="rounded-md text-center bg-slate-50 focus:bg-white" type="number" value={r.po_quantity} onChange={e => handleItemChange(r.key, "po_quantity", e.target.value)} /> },
-    { title: "Recv Qty*", dataIndex: "received_quantity", width: 120, render: (t, r) => <Input size="large" className="rounded-md text-center bg-slate-50 focus:bg-white" type="number" value={r.received_quantity} onChange={e => handleItemChange(r.key, "received_quantity", e.target.value)} /> },
-    { title: "Recv Date", dataIndex: "received_date", width: 180, render: (t, r) => <DatePicker size="large" className="rounded-md bg-slate-50 focus:bg-white w-full" value={r.received_date} onChange={d => handleItemChange(r.key, "received_date", d)} /> },
-    { title: "Rej Qty*", dataIndex: "rejected_quantity", width: 120, render: (t, r) => <Input size="large" className="rounded-md text-center bg-slate-50 focus:bg-white border-red-200" type="number" value={r.rejected_quantity} onChange={e => handleItemChange(r.key, "rejected_quantity", e.target.value)} /> },
-    { title: "Return Date", dataIndex: "return_date", width: 180, render: (t, r) => <DatePicker size="large" className="rounded-md bg-slate-50 focus:bg-white w-full" value={r.return_date} onChange={d => handleItemChange(r.key, "return_date", d)} /> },
-    { title: "Gate Pass Ref", dataIndex: "gate_pass_reference", width: 180, render: (t, r) => <Input size="large" className="rounded-md bg-slate-50 focus:bg-white" value={r.gate_pass_reference} onChange={e => handleItemChange(r.key, "gate_pass_reference", e.target.value)} /> },
-    {
-      title: "Reason*", dataIndex: "rejection_reason", width: 220, render: (t, r) => (
-        <Select size="large" style={{ width: '100%' }} className="rounded-md" placeholder="Select Reason" value={r.rejection_reason || undefined} onChange={v => handleItemChange(r.key, "rejection_reason", v)}>
-          <Option value="Damaged">Damaged</Option>
-          <Option value="Quantity Shortage">Quantity Shortage</Option>
-          <Option value="Quantity Excess">Quantity Excess</Option>
-          <Option value="Wrong Item">Wrong Item</Option>
-          <Option value="Quality Issue">Quality Issue</Option>
-          <Option value="Specification Mismatch">Specification Mismatch</Option>
-          <Option value="Expired Material">Expired Material</Option>
-          <Option value="Packing Damage">Packing Damage</Option>
-          <Option value="Others">Others</Option>
-        </Select>
-      )
-    },
-    {
-      title: "Remarks", dataIndex: "rejection_remarks", width: 250, render: (t, r) => (
-        <Input
-          size="large"
-          className="rounded-md bg-slate-50 focus:bg-white"
-          status={r.rejection_reason === "Others" && !r.rejection_remarks?.trim() ? "error" : ""}
-          placeholder={r.rejection_reason === "Others" ? "Mandatory" : "Optional"}
-          value={r.rejection_remarks}
-          onChange={e => handleItemChange(r.key, "rejection_remarks", e.target.value)}
-        />
-      )
-    },
-    { title: "Act", width: 80, align: "center", fixed: 'right', render: (t, r) => <Button type="text" danger onClick={() => handleRemoveItem(r.key)} icon={<DeleteOutlined className="text-lg" />} disabled={items.length === 1} /> }
-  ];
 
   const SectionTitle = ({ step, title, icon }) => (
     <div className="flex items-center gap-3 mb-6">
@@ -297,9 +306,25 @@ function CreateMDR() {
           icon={<ArrowLeftOutlined className="text-lg" />} 
           className="mr-4 hover:bg-slate-200 text-slate-600 w-10 h-10 flex items-center justify-center rounded-full transition-colors" 
         />
-        <div>
-          <Title level={2} className="m-0 text-slate-800 tracking-tight" style={{ marginBottom: 0 }}>Create New MDR</Title>
-          <Text className="text-slate-500 font-medium text-base">Fill out the details below to log a new material discrepancy report</Text>
+        <div className="flex-1 flex justify-between items-center">
+          <div>
+            <Title level={2} className="m-0 text-slate-800 tracking-tight" style={{ marginBottom: 0 }}>Create New MDR</Title>
+            <Text className="text-slate-500 font-medium text-base">Fill out the details below to log a new material discrepancy report</Text>
+          </div>
+          {hasDraft && (
+            <Popconfirm
+              title="Clear Draft"
+              description="Are you sure you want to discard your unsaved progress?"
+              onConfirm={handleClearDraft}
+              okText="Yes, Clear"
+              cancelText="No"
+              okButtonProps={{ className: "bg-red-500 hover:bg-red-600 text-white border-none shadow-sm" }}
+            >
+              <Button type="default" danger icon={<ClearOutlined />}>
+                Clear Draft
+              </Button>
+            </Popconfirm>
+          )}
         </div>
       </div>
 
@@ -316,7 +341,7 @@ function CreateMDR() {
           />
         </div>
         
-        <Form form={form} layout="vertical" onFinish={onFinish} requiredMark={false} className="modern-form">
+        <Form form={form} layout="vertical" onFinish={onFinish} requiredMark={false} className="modern-form" onValuesChange={handleValuesChange}>
 
           {/* Section 1: Basic Info */}
           <div className={`mb-10 bg-white p-6 sm:p-8 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow ${currentStep !== 0 ? 'hidden' : ''}`}>
