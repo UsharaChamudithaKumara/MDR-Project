@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { Table, Tag, Input, Button, Space, Typography, DatePicker, Select } from "antd";
-import { SearchOutlined, PlusOutlined, AppstoreOutlined, AlertOutlined, ClockCircleOutlined, CheckCircleOutlined, ReloadOutlined } from "@ant-design/icons";
+import { Table, Tag, Input, Button, Space, Typography, DatePicker, Select, Tooltip, Popconfirm, message } from "antd";
+import { SearchOutlined, PlusOutlined, AppstoreOutlined, AlertOutlined, ClockCircleOutlined, CheckCircleOutlined, ReloadOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -40,6 +40,16 @@ function Dashboard() {
         console.error(err);
         setLoading(false);
       });
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/delete-mdr/${id}`);
+      message.success("MDR deleted successfully");
+      fetchMDRs();
+    } catch (error) {
+      message.error("Failed to delete MDR");
+    }
   };
 
   const total = mdrs.length;
@@ -136,6 +146,7 @@ function Dashboard() {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      width: 130,
       render: (status) => (
         <Tag color={getStatusColor(status)} key={status} className="px-3 py-1 rounded-full font-semibold border-none shadow-sm">
           {status ? status.toUpperCase() : "OPEN"}
@@ -150,15 +161,34 @@ function Dashboard() {
       onFilter: (value, record) => record.status === value,
     },
     {
-      title: "Action",
+      title: "Actions",
       key: "action",
       align: "center",
+      width: 140,
       render: (_, record) => (
-        <Link to={`/mdr/${record.id}`}>
-           <Button type="link" size="small" className="text-[#344D67] font-semibold hover:text-[#FF0000]">
-             View Detail
-           </Button>
-        </Link>
+        <Space size="small">
+          <Tooltip title="View Report">
+            <Link to={`/mdr/${record.id}`}>
+              <Button type="primary" size="small" icon={<EyeOutlined />} className="bg-[#344D67] hover:bg-[#2a3e52]" />
+            </Link>
+          </Tooltip>
+          <Tooltip title="Edit Report">
+            <Link to={`/edit/${record.id}`}>
+              <Button size="small" icon={<EditOutlined />} className="text-[#344D67] border-[#344D67] hover:text-[#FF0000] hover:border-[#FF0000]" />
+            </Link>
+          </Tooltip>
+          <Tooltip title="Delete Report">
+            <Popconfirm
+              title="Are you sure you want to delete this MDR?"
+              onConfirm={() => handleDelete(record.id)}
+              okText="Yes"
+              cancelText="No"
+              okButtonProps={{ danger: true, type: 'primary', className: 'bg-red-500 hover:bg-red-600 text-white border-none' }}
+            >
+              <Button danger size="small" icon={<DeleteOutlined />} />
+            </Popconfirm>
+          </Tooltip>
+        </Space>
       ),
     },
   ];
@@ -271,6 +301,7 @@ function Dashboard() {
             rowClassName="hover:bg-slate-50 cursor-pointer transition-colors"
             size="middle"
             className="modern-table"
+            scroll={{ x: 'max-content' }}
           />
         </div>
       </div>

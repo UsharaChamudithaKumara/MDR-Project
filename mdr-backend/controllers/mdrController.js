@@ -62,6 +62,55 @@ const mdrController = {
     }
   },
 
+  updateMdr: async (req, res) => {
+    const connection = await db.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      const mdrId = req.params.id;
+      let header, items;
+      try {
+        header = JSON.parse(req.body.header);
+        items = JSON.parse(req.body.items || "[]");
+      } catch (parseError) {
+        await connection.rollback();
+        return res.status(400).json({ error: "Invalid JSON format for header or items" });
+      }
+
+      // Validation
+      for (const item of items) {
+        const rejQty = parseFloat(item.rejected_qty || item.rejected_quantity || 0);
+        const recvQty = parseFloat(item.received_qty || item.received_quantity || 0);
+        if (rejQty > recvQty) {
+          await connection.rollback();
+          return res.status(400).json({ error: "Rejected Quantity cannot be greater than Received Quantity" });
+        }
+      }
+
+      // Update Header
+      await MdrModel.updateHeader(mdrId, header, connection);
+
+      // Delete existing items and insert new ones
+      await MdrModel.deleteItems(mdrId, connection);
+      await MdrModel.createItems(items, mdrId, connection);
+
+      // Add new Attachments (if any)
+      if (req.files && req.files.length > 0) {
+        await MdrModel.createAttachments(req.files, mdrId, connection);
+      }
+
+      await connection.commit();
+      res.json({ message: "MDR Updated Successfully" });
+
+    } catch (error) {
+      await connection.rollback();
+      console.error("Server Error:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    } finally {
+      connection.release();
+    }
+  },
+
   getMdrList: async (req, res) => {
     try {
       const { status, supplier_name, start_date, end_date } = req.query;
@@ -168,6 +217,28 @@ const mdrController = {
     } catch (error) {
       console.error("Generate Report Error:", error);
       res.status(500).json({ error: "Failed to generate report" });
+    }
+  },
+
+  deleteMdr: async (req, res) => {
+    const connection = await db.getConnection();
+    try {
+      await connection.beginTransaction();
+      const mdrId = req.params.id;
+
+      // Delete child records first to avoid foreign key constraint errors
+      await MdrModel.deleteAttachments(mdrId, connection);
+      await MdrModel.deleteItems(mdrId, connection);
+      await MdrModel.deleteHeader(mdrId, connection);
+
+      await connection.commit();
+      res.json({ message: "MDR deleted successfully" });
+    } catch (error) {
+      await connection.rollback();
+      console.error("Delete Error:", error);
+      res.status(500).json({ error: "Delete failed" });
+    } finally {
+      connection.release();
     }
   }
 };
