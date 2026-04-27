@@ -7,6 +7,7 @@ import {
   SafetyOutlined,
   LeftOutlined,
   RightOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import AuthService from "../services/AuthService";
 import cpcLogo from "../Image/Ceylon_Petroleum_Corporation_logo.png";
@@ -14,6 +15,7 @@ import cpcLogo from "../Image/Ceylon_Petroleum_Corporation_logo.png";
 const menuItems = [
   { name: "Dashboard", path: "/admin", icon: <DashboardOutlined /> },
   { name: "User Management", path: "/admin/users", icon: <TeamOutlined /> },
+  { name: "Profile", path: "/admin/profile", icon: <UserOutlined /> },
 ];
 
 function AdminLayout({ children }) {
@@ -74,11 +76,15 @@ function AdminLayout({ children }) {
         {!isCollapsed && (
           <div className="p-4 border-t border-white/10 bg-black/20">
             <div className="flex items-center gap-3 mb-3 px-2">
-              <div className="w-9 h-9 rounded-full bg-[#FF0000] flex items-center justify-center font-bold text-sm shadow-lg shadow-red-500/20">
-                {user?.username?.[0]?.toUpperCase()}
+              <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-[#FF0000] shadow-lg shadow-red-500/20 border-2 border-white/10">
+                {user?.profile_image ? (
+                  <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${user.profile_image}`} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="font-bold text-sm text-white">{user?.username?.[0]?.toUpperCase()}</span>
+                )}
               </div>
               <div className="overflow-hidden">
-                <div className="text-sm font-semibold truncate text-white">{user?.username}</div>
+                <div className="text-sm font-semibold truncate text-white">{user?.full_name || user?.username}</div>
                 <div className="flex items-center gap-1.5">
                   <SafetyOutlined className="text-[#FF0000] text-[10px]" />
                   <div className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Super Admin</div>
@@ -122,12 +128,16 @@ function AdminLayout({ children }) {
           </div>
           <div className="flex items-center gap-4">
             <div className="hidden md:flex flex-col items-end mr-2">
-              <span className="text-sm font-semibold text-white">{user?.username}</span>
+              <span className="text-sm font-semibold text-white">{user?.full_name || user?.username}</span>
               <span className="text-[10px] text-[#FF0000] font-bold uppercase tracking-widest">System Master</span>
             </div>
-            <div className="w-10 h-10 rounded-full border-2 border-[#FF0000]/30 p-0.5">
-              <div className="w-full h-full rounded-full bg-slate-800 flex items-center justify-center text-white font-bold text-sm">
-                 {user?.username?.[0]?.toUpperCase()}
+            <div className="w-10 h-10 rounded-full border-2 border-[#FF0000]/30 p-0.5 overflow-hidden">
+              <div className="w-full h-full rounded-full bg-slate-800 flex items-center justify-center text-white font-bold text-sm overflow-hidden">
+                 {user?.profile_image ? (
+                   <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${user.profile_image}`} alt="Avatar" className="w-full h-full object-cover" />
+                 ) : (
+                   user?.username?.[0]?.toUpperCase()
+                 )}
               </div>
             </div>
           </div>

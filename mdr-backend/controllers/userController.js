@@ -21,6 +21,13 @@ const userController = {
         return res.status(400).json({ message: "User ID and new password are required" });
       }
 
+      const passwordRegex = /^[A-Z](?=.*[a-z])(?=.*\d)(?=.*[^a-zA-Z0-9\s]).*$/;
+      if (!passwordRegex.test(newPassword)) {
+        return res.status(400).json({ 
+          message: "Password must start with a capital letter and contain at least one lowercase letter, one number, and one symbol" 
+        });
+      }
+
       const salt = await bcrypt.genSalt(10);
       const password_hash = await bcrypt.hash(newPassword, salt);
 
@@ -84,11 +91,42 @@ const userController = {
         FROM users
         WHERE role != 'super_admin'
       `;
-      db.query(sql, (err, results) => {
-        if (err) return res.status(500).json({ message: "Error fetching stats" });
-        res.json(results[0]);
-      });
+      const [results] = await db.query(sql);
+      res.json(results[0]);
     } catch (error) {
+      console.error("Get Stats Error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  },
+
+  getProfile: async (req, res) => {
+    try {
+      const user = await UserModel.findById(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json(user);
+    } catch (error) {
+      console.error("Get Profile Error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  },
+
+  updateProfile: async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const profileData = { ...req.body };
+
+      if (req.file) {
+        profileData.profile_image = `/uploads/profiles/${req.file.filename}`;
+      }
+
+      await UserModel.updateProfile(userId, profileData);
+      
+      const updatedUser = await UserModel.findById(userId);
+      res.json({ message: "Profile updated successfully", user: updatedUser });
+    } catch (error) {
+      console.error("Update Profile Error:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   }

@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/auth";
-const USER_API_URL = "http://localhost:5000/api/users";
+const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth`;
+const USER_API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users`;
 
 const AuthService = {
   login: async (username, password) => {
@@ -20,6 +20,10 @@ const AuthService = {
   logout: () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
+  },
+
+  updateLocalUser: (userData) => {
+    localStorage.setItem("user", JSON.stringify(userData));
   },
 
   getCurrentUser: () => {

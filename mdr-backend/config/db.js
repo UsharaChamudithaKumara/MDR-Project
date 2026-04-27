@@ -1,18 +1,21 @@
-const mysql = require("mysql2");
+const mysql = require("mysql2/promise");
 
-const db = mysql.createConnection({
+const pool = mysql.createPool({
   host: process.env.DB_HOST || "localhost",
   user: process.env.DB_USER || "root",
   password: process.env.DB_PASSWORD || process.env.DB_PASS || "root",
   database: process.env.DB_NAME || "mdr_system"
 });
 
-db.connect((err) => {
-  if (err) {
-    console.log("Database connection failed:", err);
-  } else {
-    console.log("Database Connected");
+// Test database connection
+(async () => {
+  try {
+    const connection = await pool.getConnection();
+    console.log("Database Connected successfully");
+    connection.release();
+  } catch (err) {
+    console.error("Database connection failed:", err.message);
   }
-});
+})();
 
-module.exports = db;
+module.exports = pool;

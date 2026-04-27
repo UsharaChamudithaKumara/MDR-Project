@@ -1,13 +1,18 @@
 const MdrModel = require("../models/mdrModel");
+const db = require("../config/db");
 
 const mdrController = {
   createMdr: async (req, res) => {
+    const connection = await db.getConnection();
     try {
+      await connection.beginTransaction();
+
       let header, items;
       try {
         header = JSON.parse(req.body.header);
         items = JSON.parse(req.body.items || "[]");
       } catch (parseError) {
+        await connection.rollback();
         return res.status(400).json({ error: "Invalid JSON format for header or items" });
       }
 
@@ -16,13 +21,14 @@ const mdrController = {
         const rejQty = parseFloat(item.rejected_qty || item.rejected_quantity || 0);
         const recvQty = parseFloat(item.received_qty || item.received_quantity || 0);
         if (rejQty > recvQty) {
+          await connection.rollback();
           return res.status(400).json({ error: "Rejected Quantity cannot be greater than Received Quantity" });
         }
       }
 
-      // Generate MDR Number
+      // Generate MDR Number (Locks the row if concurrent)
       const year = new Date().getFullYear();
-      const results = await MdrModel.getLatestMdrNumber(year);
+      const results = await MdrModel.getLatestMdrNumber(year, connection);
       
       let nextSequence = 1;
       if (results && results.length > 0) {
@@ -36,19 +42,23 @@ const mdrController = {
       const newMdrNumber = `MDR-${year}-${nextSequence.toString().padStart(3, "0")}`;
 
       // Insert Header
-      const mdrId = await MdrModel.createHeader(newMdrNumber, header);
+      const mdrId = await MdrModel.createHeader(newMdrNumber, header, connection);
 
       // Insert Items
-      await MdrModel.createItems(items, mdrId);
+      await MdrModel.createItems(items, mdrId, connection);
 
       // Insert Attachments
-      await MdrModel.createAttachments(req.files, mdrId);
+      await MdrModel.createAttachments(req.files, mdrId, connection);
 
+      await connection.commit();
       res.json({ message: "MDR Saved Successfully", mdr_number: newMdrNumber });
 
     } catch (error) {
+      await connection.rollback();
       console.error("Server Error:", error);
       res.status(500).json({ error: "Internal Server Error" });
+    } finally {
+      connection.release();
     }
   },
 
@@ -85,9 +95,17 @@ const mdrController = {
   },
 
   updateMdrStatus: async (req, res) => {
+    const connection = await db.getConnection();
     try {
+      await connection.beginTransaction();
+
       const mdrId = req.params.id;
-      const { status, corrective_action } = req.body;
+      const { status, corrective_action, version } = req.body;
+
+      if (version === undefined) {
+        await connection.rollback();
+        return res.status(400).json({ error: "Version number is required for updates." });
+      }
 
       let updateFields = [];
       let values = [];
@@ -103,17 +121,28 @@ const mdrController = {
       }
       
       if(updateFields.length === 0) {
-          return res.status(400).json({ error: "No relevant fields to update." });
+        await connection.rollback();
+        return res.status(400).json({ error: "No relevant fields to update." });
       }
       
-      values.push(mdrId);
+      const result = await MdrModel.updateMdrStatus(mdrId, updateFields, values, version, connection);
+      
+      if (result.affectedRows === 0) {
+        await connection.rollback();
+        return res.status(409).json({ 
+          error: "Conflict: This record has been modified by another user. Please refresh and try again." 
+        });
+      }
 
-      await MdrModel.updateMdrStatus(mdrId, updateFields, values);
+      await connection.commit();
       res.json({ message: "Updated Successfully" });
       
     } catch (error) {
+      await connection.rollback();
       console.error("Update Error:", error);
       res.status(500).json({ error: "Update failed" });
+    } finally {
+      connection.release();
     }
   },
 

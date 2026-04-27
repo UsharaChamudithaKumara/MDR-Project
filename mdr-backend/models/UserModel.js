@@ -1,78 +1,99 @@
 const db = require("../config/db");
 
 const UserModel = {
-  create: (userData) => {
-    return new Promise((resolve, reject) => {
-      const sql = `INSERT INTO users (username, email, password_hash, role, status) VALUES (?, ?, ?, ?, ?)`;
-      db.query(
-        sql,
-        [userData.username, userData.email, userData.password_hash, userData.role || "user", userData.status || "pending"],
-        (err, result) => {
-          if (err) return reject(err);
-          resolve(result.insertId);
-        }
-      );
-    });
+  create: async (userData) => {
+    const sql = `INSERT INTO users (username, email, password_hash, role, status, full_name, phone_number, epf_number, department, designation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const [result] = await db.query(sql, [
+      userData.username,
+      userData.email,
+      userData.password_hash,
+      userData.role || "user",
+      userData.status || "pending",
+      userData.full_name || null,
+      userData.phone_number || null,
+      userData.epf_number || null,
+      userData.department || null,
+      userData.designation || null
+    ]);
+    return result.insertId;
   },
 
-  findByUsername: (username) => {
-    return new Promise((resolve, reject) => {
-      const sql = `SELECT * FROM users WHERE username = ?`;
-      db.query(sql, [username], (err, results) => {
-        if (err) return reject(err);
-        resolve(results[0]);
-      });
-    });
+  findByUsername: async (username) => {
+    const sql = `SELECT * FROM users WHERE username = ?`;
+    const [results] = await db.query(sql, [username]);
+    return results[0];
   },
 
-  findById: (id) => {
-    return new Promise((resolve, reject) => {
-      const sql = `SELECT id, username, email, role, status, created_at FROM users WHERE id = ?`;
-      db.query(sql, [id], (err, results) => {
-        if (err) return reject(err);
-        resolve(results[0]);
-      });
-    });
+  findById: async (id) => {
+    const sql = `SELECT id, username, email, full_name, phone_number, epf_number, department, designation, profile_image, role, status, created_at FROM users WHERE id = ?`;
+    const [results] = await db.query(sql, [id]);
+    return results[0];
   },
 
-  getAllUsers: () => {
-    return new Promise((resolve, reject) => {
-      const sql = `SELECT id, username, email, role, status, created_at FROM users ORDER BY created_at DESC`;
-      db.query(sql, (err, results) => {
-        if (err) return reject(err);
-        resolve(results);
-      });
-    });
+  getAllUsers: async () => {
+    const sql = `SELECT id, username, email, full_name, phone_number, epf_number, department, designation, profile_image, role, status, created_at FROM users ORDER BY created_at DESC`;
+    const [results] = await db.query(sql);
+    return results;
   },
 
-  updatePassword: (id, passwordHash) => {
-    return new Promise((resolve, reject) => {
-      const sql = `UPDATE users SET password_hash = ? WHERE id = ?`;
-      db.query(sql, [passwordHash, id], (err, result) => {
-        if (err) return reject(err);
-        resolve(result);
-      });
-    });
+  updateProfile: async (id, profileData) => {
+    const fields = [];
+    const values = [];
+
+    if (profileData.full_name !== undefined) {
+      fields.push("full_name = ?");
+      values.push(profileData.full_name);
+    }
+    if (profileData.phone_number !== undefined) {
+      fields.push("phone_number = ?");
+      values.push(profileData.phone_number);
+    }
+    if (profileData.epf_number !== undefined) {
+      fields.push("epf_number = ?");
+      values.push(profileData.epf_number);
+    }
+    if (profileData.department !== undefined) {
+      fields.push("department = ?");
+      values.push(profileData.department);
+    }
+    if (profileData.designation !== undefined) {
+      fields.push("designation = ?");
+      values.push(profileData.designation);
+    }
+    if (profileData.profile_image !== undefined) {
+      fields.push("profile_image = ?");
+      values.push(profileData.profile_image);
+    }
+    if (profileData.email !== undefined) {
+      fields.push("email = ?");
+      values.push(profileData.email);
+    }
+
+    if (fields.length === 0) return null;
+
+    const sql = `UPDATE users SET ${fields.join(", ")} WHERE id = ?`;
+    values.push(id);
+
+    const [result] = await db.query(sql, values);
+    return result;
   },
 
-  updateStatus: (id, status) => {
-    return new Promise((resolve, reject) => {
-      const sql = `UPDATE users SET status = ? WHERE id = ?`;
-      db.query(sql, [status, id], (err, result) => {
-        if (err) return reject(err);
-        resolve(result);
-      });
-    });
+  updatePassword: async (id, passwordHash) => {
+    const sql = `UPDATE users SET password_hash = ? WHERE id = ?`;
+    const [result] = await db.query(sql, [passwordHash, id]);
+    return result;
   },
 
-  delete: (id) => {
-    return new Promise((resolve, reject) => {
-      const sql = `DELETE FROM users WHERE id = ?`;
-      db.query(sql, [id], (err, result) => {
-        if (err) return reject(err);
-        resolve(result);
-      });
-    });
+  updateStatus: async (id, status) => {
+    const sql = `UPDATE users SET status = ? WHERE id = ?`;
+    const [result] = await db.query(sql, [status, id]);
+    return result;
+  },
+
+  delete: async (id) => {
+    const sql = `DELETE FROM users WHERE id = ?`;
+    const [result] = await db.query(sql, [id]);
+    return result;
   }
 };
 

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Form, Input, Button, Typography, message, Select } from "antd";
-import { UserOutlined, LockOutlined, MailOutlined, UserAddOutlined } from "@ant-design/icons";
+import { Form, Input, Button, Typography, message, Select, Row, Col } from "antd";
+import { UserOutlined, LockOutlined, MailOutlined, UserAddOutlined, PhoneOutlined, BankOutlined, SafetyCertificateOutlined, IdcardOutlined } from "@ant-design/icons";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import AuthService from "../services/AuthService";
@@ -123,62 +123,160 @@ const SignupPage = () => {
             requiredMark={false}
             initialValues={{ role: 'user' }}
           >
-            <motion.div variants={itemVariants}>
-              <Form.Item
-                label={<Text strong>Username</Text>}
-                name="username"
-                rules={[{ required: true, message: 'Please enter your username' }]}
-              >
-                <Input 
-                  prefix={<UserOutlined className="text-slate-400" />} 
-                  placeholder="Choose a username" 
-                  className="rounded-xl h-12 border-slate-200 hover:border-slate-300 focus:border-red-600 transition-all"
-                />
-              </Form.Item>
-            </motion.div>
+            <Row gutter={16}>
+              <Col span={24}>
+                <motion.div variants={itemVariants}>
+                  <Form.Item
+                    label={<Text strong>Username</Text>}
+                    name="username"
+                    rules={[{ required: true, message: 'Please enter your username' }]}
+                  >
+                    <Input 
+                      prefix={<IdcardOutlined className="text-slate-400" />} 
+                      placeholder="Choose a username" 
+                      className="rounded-xl h-12 border-slate-200 hover:border-slate-300 focus:border-red-600 transition-all"
+                    />
+                  </Form.Item>
+                </motion.div>
+              </Col>
 
-            <motion.div variants={itemVariants}>
-              <Form.Item
-                label={<Text strong>Email Address</Text>}
-                name="email"
-                rules={[
-                  { required: true, message: 'Please enter your email' },
-                  { type: 'email', message: 'Please enter a valid email' }
-                ]}
-              >
-                <Input 
-                  prefix={<MailOutlined className="text-slate-400" />} 
-                  placeholder="Enter your email" 
-                  className="rounded-xl h-12 border-slate-200 hover:border-slate-300 focus:border-red-600 transition-all"
-                />
-              </Form.Item>
-            </motion.div>
+              <Col span={24}>
+                <motion.div variants={itemVariants}>
+                  <Form.Item
+                    label={<Text strong>Full Name</Text>}
+                    name="full_name"
+                    rules={[{ required: true, message: 'Please enter your full name' }]}
+                  >
+                    <Input 
+                      prefix={<UserOutlined className="text-slate-400" />} 
+                      placeholder="Enter your full name" 
+                      className="rounded-xl h-12 border-slate-200 hover:border-slate-300 focus:border-red-600 transition-all"
+                    />
+                  </Form.Item>
+                </motion.div>
+              </Col>
 
-            <motion.div variants={itemVariants}>
-              <Form.Item
-                label={<Text strong>Password</Text>}
-                name="password"
-                rules={[{ required: true, message: 'Please enter a password' }]}
-              >
-                <Input.Password 
-                  prefix={<LockOutlined className="text-slate-400" />} 
-                  placeholder="Create a password" 
-                  className="rounded-xl h-12 border-slate-200 hover:border-slate-300 focus:border-red-600 transition-all"
-                />
-              </Form.Item>
-            </motion.div>
+              <Col xs={24} sm={12}>
+                <motion.div variants={itemVariants}>
+                  <Form.Item
+                    label={<Text strong>Email Address</Text>}
+                    name="email"
+                    rules={[
+                      { required: true, message: 'Please enter your email' },
+                      { type: 'email', message: 'Please enter a valid email' }
+                    ]}
+                  >
+                    <Input 
+                      prefix={<MailOutlined className="text-slate-400" />} 
+                      placeholder="Enter your email" 
+                      className="rounded-xl h-12 border-slate-200 hover:border-slate-300 focus:border-red-600 transition-all"
+                    />
+                  </Form.Item>
+                </motion.div>
+              </Col>
 
-            <motion.div variants={itemVariants}>
-              <Form.Item
-                label={<Text strong>Role</Text>}
-                name="role"
-              >
-                <Select className="rounded-xl h-12 border-slate-200 transition-all focus:border-red-600">
-                  <Option value="user">User</Option>
-                  <Option value="admin">Admin</Option>
-                </Select>
-              </Form.Item>
-            </motion.div>
+              <Col xs={24} sm={12}>
+                <motion.div variants={itemVariants}>
+                  <Form.Item
+                    label={<Text strong>Phone Number</Text>}
+                    name="phone_number"
+                    rules={[
+                      { 
+                        pattern: /^\+?[0-9]{9,15}$/, 
+                        message: "Invalid phone number format. Use 9-15 digits, optionally starting with '+'" 
+                      }
+                    ]}
+                  >
+                    <Input 
+                      prefix={<PhoneOutlined className="text-slate-400" />} 
+                      placeholder="Enter phone number" 
+                      className="rounded-xl h-12 border-slate-200 hover:border-slate-300 focus:border-red-600 transition-all"
+                    />
+                  </Form.Item>
+                </motion.div>
+              </Col>
+
+              <Col xs={24} sm={12}>
+                <motion.div variants={itemVariants}>
+                  <Form.Item
+                    label={<Text strong>EPF Number</Text>}
+                    name="epf_number"
+                  >
+                    <Input 
+                      prefix={<SafetyCertificateOutlined className="text-slate-400" />} 
+                      placeholder="Enter EPF number" 
+                      className="rounded-xl h-12 border-slate-200 hover:border-slate-300 focus:border-red-600 transition-all"
+                    />
+                  </Form.Item>
+                </motion.div>
+              </Col>
+
+              <Col xs={24} sm={12}>
+                <motion.div variants={itemVariants}>
+                  <Form.Item
+                    label={<Text strong>Department</Text>}
+                    name="department"
+                  >
+                    <Input 
+                      prefix={<BankOutlined className="text-slate-400" />} 
+                      placeholder="Enter department" 
+                      className="rounded-xl h-12 border-slate-200 hover:border-slate-300 focus:border-red-600 transition-all"
+                    />
+                  </Form.Item>
+                </motion.div>
+              </Col>
+
+              <Col xs={24} sm={12}>
+                <motion.div variants={itemVariants}>
+                  <Form.Item
+                    label={<Text strong>Designation</Text>}
+                    name="designation"
+                  >
+                    <Input 
+                      prefix={<UserOutlined className="text-slate-400" />} 
+                      placeholder="Enter designation" 
+                      className="rounded-xl h-12 border-slate-200 hover:border-slate-300 focus:border-red-600 transition-all"
+                    />
+                  </Form.Item>
+                </motion.div>
+              </Col>
+
+              <Col xs={24} sm={12}>
+                <motion.div variants={itemVariants}>
+                  <Form.Item
+                    label={<Text strong>Role</Text>}
+                    name="role"
+                  >
+                    <Select className="rounded-xl h-12 border-slate-200 transition-all focus:border-red-600">
+                      <Option value="user">User</Option>
+                      <Option value="admin">Admin</Option>
+                    </Select>
+                  </Form.Item>
+                </motion.div>
+              </Col>
+
+              <Col span={24}>
+                <motion.div variants={itemVariants}>
+                  <Form.Item
+                    label={<Text strong>Password</Text>}
+                    name="password"
+                    rules={[
+                      { required: true, message: 'Please enter a password' },
+                      { 
+                        pattern: /^[A-Z](?=.*[a-z])(?=.*\d)(?=.*[^a-zA-Z0-9\s]).*$/, 
+                        message: 'Password must start with a capital letter and contain at least one lowercase letter, one number, and one symbol' 
+                      }
+                    ]}
+                  >
+                    <Input.Password 
+                      prefix={<LockOutlined className="text-slate-400" />} 
+                      placeholder="Create a password" 
+                      className="rounded-xl h-12 border-slate-200 hover:border-slate-300 focus:border-red-600 transition-all"
+                    />
+                  </Form.Item>
+                </motion.div>
+              </Col>
+            </Row>
 
             <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} style={{ marginTop: 24 }}>
               <Form.Item>

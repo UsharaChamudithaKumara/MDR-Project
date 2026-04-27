@@ -5,10 +5,39 @@ const UserModel = require("../models/UserModel");
 const authController = {
   register: async (req, res) => {
     try {
-      const { username, email, password, role } = req.body;
+      const { 
+        username, 
+        email, 
+        password, 
+        role, 
+        full_name, 
+        phone_number, 
+        epf_number, 
+        department, 
+        designation 
+      } = req.body;
 
       if (!username || !email || !password) {
         return res.status(400).json({ message: "All fields are required" });
+      }
+
+      const passwordRegex = /^[A-Z](?=.*[a-z])(?=.*\d)(?=.*[^a-zA-Z0-9\s]).*$/;
+      if (!passwordRegex.test(password)) {
+        return res.status(400).json({ 
+          message: "Password must start with a capital letter and contain at least one lowercase letter, one number, and one symbol" 
+        });
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: "Invalid email format" });
+      }
+
+      if (phone_number) {
+        const phoneRegex = /^\+?[0-9]{9,15}$/;
+        if (!phoneRegex.test(phone_number)) {
+          return res.status(400).json({ message: "Invalid phone number format. It should contain 9 to 15 digits, optionally starting with '+'" });
+        }
       }
 
       // Check if user exists
@@ -29,7 +58,12 @@ const authController = {
         username,
         email,
         password_hash,
-        role: assignedRole
+        role: assignedRole,
+        full_name,
+        phone_number,
+        epf_number,
+        department,
+        designation
       });
 
       res.status(201).json({ message: "User registered successfully. Your account is pending approval by a Super Admin." });

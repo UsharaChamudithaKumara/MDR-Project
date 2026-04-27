@@ -20,6 +20,7 @@ function Sidebar({ isCollapsed, setIsCollapsed }) {
     { name: "MDR List", path: "/mdr-list", icon: <UnorderedListOutlined /> },
     { name: "Reports", path: "/reports", icon: <UnorderedListOutlined /> },
     { name: "UOM Management", path: "/uom", icon: <UnorderedListOutlined /> },
+    { name: "Profile", path: "/profile", icon: <UserOutlined /> },
   ];
 
   // Add User Management for super_admin
@@ -73,12 +74,16 @@ function Sidebar({ isCollapsed, setIsCollapsed }) {
       {!isCollapsed && (
         <div className="p-4 border-t border-white/10 bg-black/20">
           <div className="flex items-center gap-3 mb-3 px-2">
-            <div className="w-8 h-8 rounded-full bg-[#FF0000] flex items-center justify-center font-bold text-sm">
-              {user?.username?.[0]?.toUpperCase()}
+            <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center bg-[#FF0000] shadow-lg shadow-red-500/20">
+              {user?.profile_image ? (
+                <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${user.profile_image}`} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                <span className="font-bold text-sm text-white">{user?.username?.[0]?.toUpperCase()}</span>
+              )}
             </div>
             <div className="overflow-hidden">
-              <div className="text-sm font-medium truncate">{user?.username}</div>
-              <div className="text-[10px] text-slate-500 uppercase tracking-wider">{user?.role}</div>
+              <div className="text-sm font-semibold truncate text-white">{user?.full_name || user?.username}</div>
+              <div className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">{user?.role}</div>
             </div>
           </div>
           <button

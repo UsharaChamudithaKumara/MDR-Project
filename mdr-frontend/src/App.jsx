@@ -14,6 +14,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Reports from "./pages/Reports";
+import ProfilePage from "./pages/ProfilePage";
 
 function App() {
   return (
@@ -57,6 +58,7 @@ function App() {
                   <Routes>
                     <Route path="/" element={<AdminDashboard />} />
                     <Route path="/users" element={<AdminUsers />} />
+                    <Route path="/profile" element={<ProfilePage />} />
                   </Routes>
                 </AdminLayout>
               </ProtectedRoute>
@@ -76,6 +78,7 @@ function App() {
                     <Route path="/mdr/:id" element={<ViewMDR />} />
                     <Route path="/uom" element={<UOMManagement />} />
                     <Route path="/reports" element={<Reports />} />
+                    <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/users" element={
                       <ProtectedRoute roles={['super_admin']}>
                         <UserManagement />
