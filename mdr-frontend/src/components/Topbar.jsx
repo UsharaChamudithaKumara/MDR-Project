@@ -20,28 +20,7 @@ function Topbar() {
       </div>
 
       <div className="flex items-center gap-6">
-        <div className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-slate-100 transition-colors cursor-pointer group">
-          <Badge count={3} size="small" offset={[2, -2]}>
-            <BellOutlined className="text-[22px] text-slate-600 group-hover:text-[#FF0000] transition-colors" />
-          </Badge>
-        </div>
-        
-        <div className="h-8 w-px bg-slate-200"></div>
-
-        <Dropdown menu={userMenu} placement="bottomRight" trigger={['click']}>
-          <div className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 px-3 py-1.5 rounded-full transition-all border border-transparent hover:border-slate-200 shadow-sm hover:shadow">
-            <Avatar 
-              size="large" 
-              icon={<UserOutlined />} 
-              src="https://api.dicebear.com/7.x/notionists/svg?seed=Admin"
-              className="bg-[#344D67]/10 text-[#344D67]" 
-            />
-            <div className="hidden sm:block text-right">
-              <div className="font-semibold text-slate-800 text-sm leading-tight">Admin User</div>
-              <div className="text-xs text-slate-500 font-medium">System Manager</div>
-            </div>
-          </div>
-        </Dropdown>
+        {/* User requested to remove notification icon and Admin User section from here */}
       </div>
     </div>
   );

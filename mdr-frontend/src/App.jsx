@@ -3,6 +3,7 @@ import { ConfigProvider } from "antd";
 import MDRList from "./pages/MDRList";
 import CreateMDR from "./pages/CreateMDR";
 import ViewMDR from "./pages/ViewMDR";
+import EditMDR from "./pages/EditMDR";
 import UOMManagement from "./pages/UOMManagement";
 import Dashboard from "./pages/Dashboard";
 import Layout from "./components/Layout";
@@ -76,6 +77,7 @@ function App() {
                     <Route path="/mdr-list" element={<MDRList />} />
                     <Route path="/create" element={<CreateMDR />} />
                     <Route path="/mdr/:id" element={<ViewMDR />} />
+                    <Route path="/edit/:id" element={<EditMDR />} />
                     <Route path="/uom" element={<UOMManagement />} />
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/profile" element={<ProfilePage />} />

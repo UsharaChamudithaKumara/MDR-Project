@@ -41,8 +41,8 @@ const authController = {
       }
 
       // Check if user exists
-      const existingUser = await UserModel.findByUsername(username);
-      if (existingUser) {
+      const existingUser = await UserModel.findByUsernameOrEmail(username);
+      if (existingUser && existingUser.username === username) {
         return res.status(400).json({ message: "Username already exists" });
       }
 
@@ -81,7 +81,7 @@ const authController = {
         return res.status(400).json({ message: "Username and password are required" });
       }
 
-      const user = await UserModel.findByUsername(username);
+      const user = await UserModel.findByUsernameOrEmail(username);
       if (!user) {
         return res.status(401).json({ message: "Invalid credentials" });
       }

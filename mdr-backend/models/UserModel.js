@@ -18,9 +18,9 @@ const UserModel = {
     return result.insertId;
   },
 
-  findByUsername: async (username) => {
-    const sql = `SELECT * FROM users WHERE username = ?`;
-    const [results] = await db.query(sql, [username]);
+  findByUsernameOrEmail: async (identifier) => {
+    const sql = `SELECT * FROM users WHERE username = ? OR email = ?`;
+    const [results] = await db.query(sql, [identifier, identifier]);
     return results[0];
   },
 

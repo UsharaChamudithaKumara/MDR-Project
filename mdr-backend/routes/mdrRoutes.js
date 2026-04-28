@@ -35,5 +35,7 @@ router.get("/mdr/:id", mdrController.getMdrDetails);
 router.get("/mdr-report", mdrController.generateReport);
 router.put("/update-status/:id", mdrController.updateMdrStatus);
 router.put("/update-item-return-date/:id", mdrController.updateItemReturnDate);
+router.put("/update-mdr/:id", upload.array("evidence_photos", 10), mdrController.updateMdr);
+router.delete("/delete-mdr/:id", mdrController.deleteMdr);
 
 module.exports = router;

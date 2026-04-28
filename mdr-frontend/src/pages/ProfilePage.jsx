@@ -67,7 +67,8 @@ function ProfilePage() {
       setEditing(false);
       message.success("Profile updated successfully");
     } catch (error) {
-      message.error("Failed to update profile");
+      const errorMsg = error.response?.data?.message || "Failed to update profile";
+      message.error(errorMsg);
       console.error(error);
     } finally {
       setLoading(false);
@@ -287,6 +288,42 @@ function ProfilePage() {
                   <Col span={24}>
                     <Form.Item label="Designation" name="designation">
                       <Input prefix={<UserOutlined />} placeholder="Enter designation (e.g. Manager, Engineer)" />
+                    </Form.Item>
+                  </Col>
+                  <Col span={24}>
+                    <Divider className="my-2">Change Password (Optional)</Divider>
+                  </Col>
+                  <Col xs={24} sm={12}>
+                    <Form.Item 
+                      label="New Password" 
+                      name="new_password"
+                      rules={[
+                        { 
+                          pattern: /^[A-Z](?=.*[a-z])(?=.*\d)(?=.*[^a-zA-Z0-9\s]).*$/, 
+                          message: "Must start with a capital letter and contain at least one lowercase, one number, and one symbol" 
+                        }
+                      ]}
+                    >
+                      <Input.Password placeholder="Leave blank to keep current" />
+                    </Form.Item>
+                  </Col>
+                  <Col xs={24} sm={12}>
+                    <Form.Item 
+                      label="Confirm Password" 
+                      name="confirm_password"
+                      dependencies={['new_password']}
+                      rules={[
+                        ({ getFieldValue }) => ({
+                          validator(_, value) {
+                            if (!value || getFieldValue('new_password') === value) {
+                              return Promise.resolve();
+                            }
+                            return Promise.reject(new Error('The two passwords do not match!'));
+                          },
+                        }),
+                      ]}
+                    >
+                      <Input.Password placeholder="Confirm new password" />
                     </Form.Item>
                   </Col>
                 </Row>

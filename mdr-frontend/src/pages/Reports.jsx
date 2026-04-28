@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Table, Tag, Button, Typography, Space, DatePicker, Select, Input, message } from "antd";
-import { SearchOutlined, FileExcelOutlined, FilePdfOutlined, ReloadOutlined } from "@ant-design/icons";
+import { Table, Tag, Button, Typography, Space, DatePicker, Select, Input, message, Tooltip, Popconfirm } from "antd";
+import { SearchOutlined, FileExcelOutlined, FilePdfOutlined, ReloadOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Link } from "react-router-dom";
 import * as xlsx from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -60,6 +61,16 @@ function Reports() {
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const year = d.getFullYear();
     return `${day}/${month}/${year}`;
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/delete-mdr/${id}`);
+      message.success("MDR deleted successfully");
+      fetchReports();
+    } catch (error) {
+      message.error("Failed to delete MDR");
+    }
   };
 
   const handleExport = () => {
@@ -189,10 +200,42 @@ function Reports() {
       dataIndex: "status",
       key: "status",
       align: "center",
+      width: 130,
       render: status => (
         <Tag color={getStatusColor(status)} className="px-3 py-1 rounded-full font-semibold border-none shadow-sm">
           {status ? status.toUpperCase() : "OPEN"}
         </Tag>
+      )
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      align: "center",
+      width: 140,
+      render: (_, record) => (
+        <Space size="small">
+          <Tooltip title="View Report">
+            <Link to={`/mdr/${record.id}`}>
+              <Button type="primary" size="small" icon={<EyeOutlined />} className="bg-[#344D67] hover:bg-[#2a3e52]" />
+            </Link>
+          </Tooltip>
+          <Tooltip title="Edit Report">
+            <Link to={`/edit/${record.id}`}>
+              <Button size="small" icon={<EditOutlined />} className="text-[#344D67] border-[#344D67] hover:text-[#FF0000] hover:border-[#FF0000]" />
+            </Link>
+          </Tooltip>
+          <Tooltip title="Delete Report">
+            <Popconfirm
+              title="Are you sure you want to delete this MDR?"
+              onConfirm={() => handleDelete(record.id)}
+              okText="Yes"
+              cancelText="No"
+              okButtonProps={{ danger: true, type: 'primary', className: 'bg-red-500 hover:bg-red-600 text-white border-none' }}
+            >
+              <Button danger size="small" icon={<DeleteOutlined />} />
+            </Popconfirm>
+          </Tooltip>
+        </Space>
       )
     }
   ];
@@ -301,6 +344,7 @@ function Reports() {
             rowClassName="hover:bg-slate-50 cursor-pointer transition-colors"
             size="middle"
             className="modern-table"
+            scroll={{ x: 'max-content' }}
           />
         </div>
       </div>

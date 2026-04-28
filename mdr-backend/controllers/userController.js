@@ -121,6 +121,18 @@ const userController = {
         profileData.profile_image = `/uploads/profiles/${req.file.filename}`;
       }
 
+      if (profileData.new_password) {
+        const passwordRegex = /^[A-Z](?=.*[a-z])(?=.*\d)(?=.*[^a-zA-Z0-9\s]).*$/;
+        if (!passwordRegex.test(profileData.new_password)) {
+          return res.status(400).json({ 
+            message: "Password must start with a capital letter and contain at least one lowercase letter, one number, and one symbol" 
+          });
+        }
+        const salt = await bcrypt.genSalt(10);
+        const password_hash = await bcrypt.hash(profileData.new_password, salt);
+        await UserModel.updatePassword(userId, password_hash);
+      }
+
       await UserModel.updateProfile(userId, profileData);
       
       const updatedUser = await UserModel.findById(userId);

@@ -1,20 +1,34 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { Table, Tag, Button, Typography, Space } from "antd";
-import { PlusOutlined, FileTextOutlined } from "@ant-design/icons";
+import { Table, Tag, Button, Typography, Space, Tooltip, Popconfirm, message } from "antd";
+import { PlusOutlined, FileTextOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
 
 function MDRList() {
   const [mdrs, setMdrs] = useState([]);
 
-  useEffect(() => {
+  const fetchMDRs = () => {
     axios
       .get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/mdr-list`)
       .then((res) => setMdrs(res.data))
       .catch((err) => console.error(err));
+  };
+
+  useEffect(() => {
+    fetchMDRs();
   }, []);
+
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/delete-mdr/${id}`);
+      message.success("MDR deleted successfully");
+      fetchMDRs();
+    } catch (error) {
+      message.error("Failed to delete MDR");
+    }
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -28,20 +42,10 @@ function MDRList() {
   };
 
   const columns = [
-    { 
-      title: "ID", 
-      dataIndex: "id", 
-      key: "id", 
-      width: 80,
-      render: (id) => <span className="text-slate-400 font-mono text-xs">#{id}</span>
-    },
     {
       title: "MDR Number", dataIndex: "mdr_number", key: "mdr",
       render: (text, record) => (
-        <Space>
-          <FileTextOutlined className="text-slate-400" />
-          <Link to={`/mdr/${record.id}`} className="text-[#344D67] font-semibold hover:text-[#FF0000] hover:underline transition-colors">{text}</Link>
-        </Space>
+        <span className="text-[#344D67] font-bold">{text}</span>
       )
     },
     { 
@@ -58,6 +62,7 @@ function MDRList() {
     },
     {
       title: "Status", dataIndex: "status", key: "status",
+      width: 130,
       render: status => (
         <Tag color={getStatusColor(status)} className="px-3 py-1 rounded-full font-semibold border-none shadow-sm">
           {status ? status.toUpperCase() : "OPEN"}
@@ -70,6 +75,37 @@ function MDRList() {
       key: "items", 
       align: "center",
       render: (val) => <Tag className="rounded-full px-3 bg-slate-100 text-slate-700 border-none">{val}</Tag>
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      align: "center",
+      width: 140,
+      render: (_, record) => (
+        <Space size="small">
+          <Tooltip title="View Report">
+            <Link to={`/mdr/${record.id}`}>
+              <Button type="primary" size="small" icon={<EyeOutlined />} className="bg-[#344D67] hover:bg-[#2a3e52]" />
+            </Link>
+          </Tooltip>
+          <Tooltip title="Edit Report">
+            <Link to={`/edit/${record.id}`}>
+              <Button size="small" icon={<EditOutlined />} className="text-[#344D67] border-[#344D67] hover:text-[#FF0000] hover:border-[#FF0000]" />
+            </Link>
+          </Tooltip>
+          <Tooltip title="Delete Report">
+            <Popconfirm
+              title="Are you sure you want to delete this MDR?"
+              onConfirm={() => handleDelete(record.id)}
+              okText="Yes"
+              cancelText="No"
+              okButtonProps={{ danger: true, type: 'primary', className: 'bg-red-500 hover:bg-red-600 text-white border-none' }}
+            >
+              <Button danger size="small" icon={<DeleteOutlined />} />
+            </Popconfirm>
+          </Tooltip>
+        </Space>
+      )
     }
   ];
 
@@ -97,6 +133,7 @@ function MDRList() {
             rowClassName="hover:bg-slate-50 cursor-pointer transition-colors"
             size="middle"
             className="modern-table"
+            scroll={{ x: 'max-content' }}
           />
         </div>
       </div>
