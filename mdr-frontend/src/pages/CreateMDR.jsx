@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
-import { Form, Input, Select, DatePicker, Button, Radio, Upload, message, Table, Typography, Space, AutoComplete, Steps, Popconfirm } from "antd";
+import { Form, Input, Select, DatePicker, Button, Upload, message, Table, Typography, Space, AutoComplete, Steps, Popconfirm, Checkbox } from "antd";
 import { InboxOutlined, PlusOutlined, DeleteOutlined, ArrowLeftOutlined, BuildOutlined, SettingOutlined, PictureOutlined, ProfileOutlined, ClearOutlined } from "@ant-design/icons";
 
 const { Dragger } = Upload;
@@ -209,7 +209,7 @@ function CreateMDR() {
         inspection_by: values.inspection_by,
         department: values.department,
         status: values.status || "Open",
-        corrective_action: values.corrective_action
+        corrective_action: values.corrective_action ? (Array.isArray(values.corrective_action) ? values.corrective_action.join(", ") : values.corrective_action) : null
       };
 
       const itemsData = items.map(item => ({
@@ -538,12 +538,12 @@ function CreateMDR() {
               <Form.Item name="department" label={<span className="font-semibold text-slate-700">Department</span>}>
                 <Input size="large" className="rounded-lg bg-slate-50 focus:bg-white" placeholder="e.g. Quality Control" />
               </Form.Item>
-              <Form.Item name="corrective_action" label={<span className="font-semibold text-slate-700 mb-2 block">Corrective Action Required</span>} initialValue="Return to Supplier">
-                <Radio.Group className="flex flex-col gap-3 w-full">
-                  <div className="p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"><Radio value="Return to Supplier" className="w-full font-medium">Return to Supplier</Radio></div>
-                  <div className="p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"><Radio value="Replacement Required" className="w-full font-medium">Replacement Required</Radio></div>
-                  <div className="p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"><Radio value="Credit Note Required" className="w-full font-medium">Credit Note Required</Radio></div>
-                </Radio.Group>
+              <Form.Item name="corrective_action" label={<span className="font-semibold text-slate-700 mb-2 block">Corrective Action Required</span>} initialValue={["Return to Supplier"]}>
+                <Checkbox.Group className="flex flex-col gap-3 w-full">
+                  <div className="p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"><Checkbox value="Return to Supplier" className="w-full font-medium">Return to Supplier</Checkbox></div>
+                  <div className="p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"><Checkbox value="Replacement Required" className="w-full font-medium">Replacement Required</Checkbox></div>
+                  <div className="p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"><Checkbox value="Credit Note Required" className="w-full font-medium">Credit Note Required</Checkbox></div>
+                </Checkbox.Group>
               </Form.Item>
               <Form.Item name="status" label={<span className="font-semibold text-slate-700 mb-2 block">Status</span>} initialValue="Open">
                 <Select size="large" className="rounded-lg bg-slate-50 focus:bg-white w-full">

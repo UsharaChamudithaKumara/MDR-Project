@@ -25,7 +25,7 @@ CREATE TABLE mdr_headers (
   inspection_by VARCHAR(100),
   department VARCHAR(100),
   status ENUM('Open', 'Pending Supplier Response', 'Closed', 'Complete') DEFAULT 'Open',
-  corrective_action ENUM('Return to Supplier', 'Replacement Required', 'Credit Note Required'),
+  corrective_action VARCHAR(500),
   version INT DEFAULT 0
 );
 

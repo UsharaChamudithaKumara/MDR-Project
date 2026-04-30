@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Table, Tag, Button, Typography, Space, DatePicker, Select, Input, message, Tooltip, Popconfirm } from "antd";
-import { SearchOutlined, FileExcelOutlined, FilePdfOutlined, ReloadOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Table, Tag, Button, Typography, Space, DatePicker, Select, Input, message, Tooltip } from "antd";
+import { SearchOutlined, FileExcelOutlined, FilePdfOutlined, ReloadOutlined, EyeOutlined, EditOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import * as xlsx from "xlsx";
 import jsPDF from "jspdf";
@@ -63,15 +63,7 @@ function Reports() {
     return `${day}/${month}/${year}`;
   };
 
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/delete-mdr/${id}`);
-      message.success("MDR deleted successfully");
-      fetchReports();
-    } catch (error) {
-      message.error("Failed to delete MDR");
-    }
-  };
+
 
   const handleExport = () => {
     if (data.length === 0) {
@@ -224,17 +216,7 @@ function Reports() {
               <Button size="small" icon={<EditOutlined />} className="text-[#344D67] border-[#344D67] hover:text-[#FF0000] hover:border-[#FF0000]" />
             </Link>
           </Tooltip>
-          <Tooltip title="Delete Report">
-            <Popconfirm
-              title="Are you sure you want to delete this MDR?"
-              onConfirm={() => handleDelete(record.id)}
-              okText="Yes"
-              cancelText="No"
-              okButtonProps={{ danger: true, type: 'primary', className: 'bg-red-500 hover:bg-red-600 text-white border-none' }}
-            >
-              <Button danger size="small" icon={<DeleteOutlined />} />
-            </Popconfirm>
-          </Tooltip>
+
         </Space>
       )
     }
