@@ -12,6 +12,7 @@ const pool = mysql.createPool({
   try {
     const connection = await pool.getConnection();
     console.log("Database Connected successfully");
+    console.log("env", process.env.DB_HOST, process.env.DB_USER, process.env.DB_PASS, process.env.DB_NAME);
     connection.release();
   } catch (err) {
     console.error("Database connection failed:", err.message);

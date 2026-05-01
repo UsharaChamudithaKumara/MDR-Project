@@ -11,7 +11,7 @@ async function run() {
 
   try {
     console.log("Checking for 'version' column in 'mdr_headers'...");
-    
+    console.log("env", process.env.DB_HOST, process.env.DB_USER, process.env.DB_PASSWORD, process.env.DB_NAME);
     // Check if column exists
     const [columns] = await connection.query("SHOW COLUMNS FROM mdr_headers LIKE 'version'");
     
