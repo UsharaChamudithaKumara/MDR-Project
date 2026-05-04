@@ -61,6 +61,18 @@ function MDRList() {
       )
     },
     { 
+      title: "Created By", 
+      dataIndex: "created_by", 
+      key: "created_by",
+      render: (text) => <span className="text-slate-600">{text || "Unknown"}</span>
+    },
+    { 
+      title: "Updated By", 
+      dataIndex: "updated_by", 
+      key: "updated_by",
+      render: (text) => <span className="text-slate-600">{text || "-"}</span>
+    },
+    { 
       title: "Total Items", 
       dataIndex: "total_items", 
       key: "items", 

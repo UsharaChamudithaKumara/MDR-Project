@@ -17,8 +17,8 @@ const MdrModel = {
   createHeader: async (newMdrNumber, header, connection = null) => {
     const sql = `
       INSERT INTO mdr_headers
-      (mdr_number, mdr_date, po_number, supplier_type, supplier_name, supplier_ref, grn_no, inspection_by, department, status, corrective_action, version)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+      (mdr_number, mdr_date, po_number, supplier_type, supplier_name, supplier_ref, grn_no, inspection_by, department, status, corrective_action, version, created_by)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)
     `;
     const result = await MdrModel.query(
       sql,
@@ -33,7 +33,8 @@ const MdrModel = {
         header.inspection_by,
         header.department,
         header.status || "Open",
-        header.corrective_action || null
+        header.corrective_action || null,
+        header.created_by || "Unknown"
       ],
       connection
     );
@@ -43,7 +44,7 @@ const MdrModel = {
   updateHeader: async (mdrId, header, connection = null) => {
     const sql = `
       UPDATE mdr_headers
-      SET mdr_date = ?, po_number = ?, supplier_type = ?, supplier_name = ?, supplier_ref = ?, grn_no = ?, inspection_by = ?, department = ?, status = ?, corrective_action = ?
+      SET mdr_date = ?, po_number = ?, supplier_type = ?, supplier_name = ?, supplier_ref = ?, grn_no = ?, inspection_by = ?, department = ?, status = ?, corrective_action = ?, updated_by = ?
       WHERE id = ?
     `;
     const result = await MdrModel.query(
@@ -59,6 +60,7 @@ const MdrModel = {
         header.department,
         header.status || "Open",
         header.corrective_action || null,
+        header.updated_by || null,
         mdrId
       ],
       connection
@@ -136,6 +138,8 @@ const MdrModel = {
         h.supplier_type,
         h.status,
         h.version,
+        h.created_by,
+        h.updated_by,
         (
           SELECT COUNT(*) 
           FROM mdr_items i 
@@ -216,7 +220,9 @@ const MdrModel = {
         i.item_description, 
         i.rejected_qty, 
         i.rejection_reason, 
-        h.status
+        h.status,
+        h.created_by,
+        h.updated_by
       FROM mdr_headers h
       LEFT JOIN mdr_items i ON h.id = i.mdr_id
       WHERE 1=1

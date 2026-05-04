@@ -191,7 +191,8 @@ function EditMDR() {
         inspection_by: values.inspection_by,
         department: values.department,
         status: values.status || "Open",
-        corrective_action: values.corrective_action ? (Array.isArray(values.corrective_action) ? values.corrective_action.join(", ") : values.corrective_action) : null
+        corrective_action: values.corrective_action ? (Array.isArray(values.corrective_action) ? values.corrective_action.join(", ") : values.corrective_action) : null,
+        updated_by: JSON.parse(localStorage.getItem("user") || "{}").full_name || JSON.parse(localStorage.getItem("user") || "{}").username || "Unknown"
       };
 
       const itemsData = items.map(item => ({

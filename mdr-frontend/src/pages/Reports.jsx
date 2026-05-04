@@ -79,6 +79,8 @@ function Reports() {
       "Item Description": item.item_description,
       "Rejected Quantity": item.rejected_qty,
       "Reason for Rejection": item.rejection_reason,
+      "Created By": item.created_by || "Unknown",
+      "Updated By": item.updated_by || "-",
       "Status": item.status
     }));
 
@@ -104,7 +106,7 @@ function Reports() {
     doc.setFontSize(16);
     doc.text("Material Discrepancy Report", 40, 22);
     
-    const tableColumn = ["MDR Number", "MDR Date", "PO Number", "Supplier Name", "Item Description", "Rejected Qty", "Reason for Rejection", "Status"];
+    const tableColumn = ["MDR Number", "MDR Date", "PO Number", "Supplier Name", "Item Description", "Rejected Qty", "Reason for Rejection", "Created By", "Updated By", "Status"];
     const tableRows = [];
 
     data.forEach(item => {
@@ -116,6 +118,8 @@ function Reports() {
         item.item_description,
         item.rejected_qty,
         item.rejection_reason,
+        item.created_by || "Unknown",
+        item.updated_by || "-",
         item.status
       ];
       tableRows.push(rowData);
@@ -186,6 +190,17 @@ function Reports() {
       dataIndex: "rejection_reason",
       key: "rejection_reason",
       ellipsis: true
+    },
+    {
+      title: "Created By",
+      dataIndex: "created_by",
+      key: "created_by",
+    },
+    {
+      title: "Updated By",
+      dataIndex: "updated_by",
+      key: "updated_by",
+      render: text => text || "-"
     },
     {
       title: "Status",

@@ -169,6 +169,11 @@ const mdrController = {
         values.push(corrective_action);
       }
       
+      if(req.body.updated_by) {
+        updateFields.push("updated_by = ?");
+        values.push(req.body.updated_by);
+      }
+      
       if(updateFields.length === 0) {
         await connection.rollback();
         return res.status(400).json({ error: "No relevant fields to update." });

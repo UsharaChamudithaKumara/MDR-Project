@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Table, Tag, Typography, Button, Space, Select, Spin, message, Image, DatePicker } from "antd";
-import { PrinterOutlined, FilePdfOutlined, FileExcelOutlined, ArrowLeftOutlined, CheckCircleOutlined, ClockCircleOutlined, ExclamationCircleOutlined, SaveOutlined, ProfileOutlined } from "@ant-design/icons";
+import { PrinterOutlined, FilePdfOutlined, FileExcelOutlined, ArrowLeftOutlined, CheckCircleOutlined, ClockCircleOutlined, ExclamationCircleOutlined, SaveOutlined, ProfileOutlined, UserOutlined, EditOutlined } from "@ant-design/icons";
 import { useReactToPrint } from "react-to-print";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -43,6 +43,7 @@ function ViewMDR() {
          await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/update-status/${id}`, {
             status: newStatus,
             version: data.header.version, // Include version for optimistic locking
+            updated_by: JSON.parse(localStorage.getItem("user") || "{}").full_name || JSON.parse(localStorage.getItem("user") || "{}").username || "Unknown"
          });
          message.success(`Status updated to ${newStatus}`);
          fetchData();
@@ -418,6 +419,8 @@ function ViewMDR() {
                <InfoBlock label="GRN Number" value={data.header.grn_no} icon={<PrinterOutlined />} />
                <InfoBlock label="Inspection By" value={data.header.inspection_by} icon={<ClockCircleOutlined />} />
                <InfoBlock label="Department" value={data.header.department} icon={<CheckCircleOutlined />} />
+               <InfoBlock label="Created By" value={data.header.created_by || "Unknown"} icon={<UserOutlined />} />
+               <InfoBlock label="Updated By" value={data.header.updated_by || "-"} icon={<EditOutlined />} />
                <div className="col-span-2 md:col-span-3 lg:col-span-2">
                   <InfoBlock label="Corrective Action" value={data.header.corrective_action} highlight={true} icon={<ExclamationCircleOutlined />} />
                </div>

@@ -54,7 +54,7 @@ function App() {
           <Route
             path="/admin/*"
             element={
-              <ProtectedRoute roles={["super_admin"]}>
+              <ProtectedRoute roles={["super_admin", "admin"]}>
                 <AdminLayout>
                   <Routes>
                     <Route path="/" element={<AdminDashboard />} />
@@ -82,7 +82,7 @@ function App() {
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/users" element={
-                      <ProtectedRoute roles={['super_admin']}>
+                      <ProtectedRoute roles={['super_admin', 'admin']}>
                         <UserManagement />
                       </ProtectedRoute>
                     } />

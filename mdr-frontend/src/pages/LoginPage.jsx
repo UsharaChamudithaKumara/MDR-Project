@@ -15,10 +15,15 @@ const LoginPage = () => {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      await AuthService.login(values.username, values.password);
+      const response = await AuthService.login(values.username, values.password);
       message.success("Login successful!");
-      navigate("/");
-      window.location.reload();
+      
+      const userRole = response.user?.role?.toLowerCase();
+      if (userRole === 'super_admin' || userRole === 'admin') {
+         window.location.href = "/admin";
+      } else {
+         window.location.href = "/";
+      }
     } catch (error) {
       message.error(error.response?.data?.message || "Login failed");
     } finally {
