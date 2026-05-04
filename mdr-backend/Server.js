@@ -40,7 +40,14 @@ app.use("/api/users", userRoutes);
 // START SERVER
 // ===============================
 const PORT = process.env.PORT || 5000;
+const runMigrations = require("./migrate_version");
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Run migrations then start server
+runMigrations().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}).catch(err => {
+  console.error("Failed to run migrations. Server not started.");
+  process.exit(1);
 });
