@@ -26,7 +26,9 @@ CREATE TABLE mdr_headers (
   department VARCHAR(100),
   status ENUM('Open', 'Pending Supplier Response', 'Closed', 'Complete') DEFAULT 'Open',
   corrective_action VARCHAR(500),
-  version INT DEFAULT 0
+  version INT DEFAULT 0,
+  created_by VARCHAR(100),
+  updated_by VARCHAR(100)
 );
 
 CREATE TABLE mdr_items (
